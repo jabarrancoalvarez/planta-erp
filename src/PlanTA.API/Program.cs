@@ -204,7 +204,16 @@ using (var scope = app.Services.CreateScope())
 }
 
 // -- Middleware pipeline --
-app.UseExceptionHandler();
+app.UseExceptionHandler(appError =>
+{
+    appError.Run(async context =>
+    {
+        var ex = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsJsonAsync(new { error = ex?.Message, stack = ex?.StackTrace });
+    });
+});
 
 if (app.Environment.IsDevelopment())
 {
