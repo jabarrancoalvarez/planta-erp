@@ -20,6 +20,8 @@ using PlanTA.SharedKernel.Audit;
 using PlanTA.SharedKernel.Behaviors;
 using PlanTA.SharedKernel.Outbox;
 using PlanTA.Ventas.Infrastructure;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -125,22 +127,40 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // -- Ensure schemas exist & seed data --
+// EnsureCreatedAsync solo crea tablas si la BD no tiene NINGUNA tabla.
+// Con múltiples DbContexts, solo el primero crea sus tablas y el resto se salta.
+// Usamos CreateTablesAsync por cada DbContext para forzar la creación.
+async Task EnsureTablesAsync(DbContext db)
+{
+    try
+    {
+        var creator = db.GetService<IRelationalDatabaseCreator>();
+        await creator.CreateTablesAsync();
+    }
+    catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
+    {
+        // 42P07 = "relation already exists" — tablas ya creadas, ignorar
+    }
+}
+
 using (var scope = app.Services.CreateScope())
 {
+    // Asegurar que la BD existe (solo la primera vez)
     var outboxDb = scope.ServiceProvider.GetRequiredService<OutboxDbContext>();
     await outboxDb.Database.EnsureCreatedAsync();
 
+    // Crear tablas de cada módulo (CreateTablesAsync funciona con múltiples DbContexts)
     var auditDb = scope.ServiceProvider.GetRequiredService<AuditDbContext>();
-    await auditDb.Database.EnsureCreatedAsync();
+    await EnsureTablesAsync(auditDb);
 
     var segDb = scope.ServiceProvider.GetRequiredService<SeguridadDbContext>();
-    await segDb.Database.EnsureCreatedAsync();
+    await EnsureTablesAsync(segDb);
 
-    await scope.ServiceProvider.GetRequiredService<InventarioDbContext>().Database.EnsureCreatedAsync();
-    await scope.ServiceProvider.GetRequiredService<ProduccionDbContext>().Database.EnsureCreatedAsync();
-    await scope.ServiceProvider.GetRequiredService<ComprasDbContext>().Database.EnsureCreatedAsync();
-    await scope.ServiceProvider.GetRequiredService<VentasDbContext>().Database.EnsureCreatedAsync();
-    await scope.ServiceProvider.GetRequiredService<CalidadDbContext>().Database.EnsureCreatedAsync();
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<InventarioDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ProduccionDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ComprasDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<VentasDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<CalidadDbContext>());
 
     // Seed roles
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
