@@ -1,7 +1,0 @@
-postgresql://neondb_owner:npg_JZ0fHKwW3qXY@ep-late-sky-alcvpjo4-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-
-
-
-
-
-Host=ep-late-sky-alcvpjo4-pooler.c-3.eu-central-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_JZ0fHKwW3qXY;SSL Mode=Require;Trust Server Certificate=true
