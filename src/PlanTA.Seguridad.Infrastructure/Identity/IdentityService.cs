@@ -50,7 +50,8 @@ public sealed class IdentityService(
         var roles = await userManager.GetRolesAsync(user);
         var rol = roles.FirstOrDefault() ?? "Operario";
 
-        var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id.Value == user.EmpresaId);
+        var empresaId = new PlanTA.Seguridad.Domain.Entities.EmpresaId(user.EmpresaId);
+        var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id == empresaId);
 
         var accessToken = GenerateAccessToken(user, rol);
         var refreshToken = GenerateRefreshToken();
@@ -75,7 +76,8 @@ public sealed class IdentityService(
 
         var roles = await userManager.GetRolesAsync(user);
         var rol = roles.FirstOrDefault() ?? "Operario";
-        var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id.Value == user.EmpresaId);
+        var empresaId = new PlanTA.Seguridad.Domain.Entities.EmpresaId(user.EmpresaId);
+        var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id == empresaId);
 
         var newAccessToken = GenerateAccessToken(user, rol);
         var newRefreshToken = GenerateRefreshToken();
@@ -112,7 +114,8 @@ public sealed class IdentityService(
 
         var roles = await userManager.GetRolesAsync(user);
         var rol = roles.FirstOrDefault() ?? "Operario";
-        var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id.Value == user.EmpresaId);
+        var empresaId = new PlanTA.Seguridad.Domain.Entities.EmpresaId(user.EmpresaId);
+        var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id == empresaId);
 
         return Result<UserDto>.Success(new UserDto(
             user.Id, user.Email!, user.Nombre, rol, user.EmpresaId, empresa?.Nombre ?? ""));
