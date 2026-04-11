@@ -21,4 +21,4 @@ services:
       - key: Jwt__RefreshTokenExpiryDays
         value: "7"
       - key: Cors__AllowedOrigins
-        value: "https://planta-web.vercel.app"
+        value: "https://planta-erp.vercel.app"
