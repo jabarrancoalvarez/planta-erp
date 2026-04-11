@@ -1,0 +1,38 @@
+<section class="problem" id="problem" aria-labelledby="problem-heading">
+  <div class="container">
+    <div class="problem__header" scrollAnimate>
+      <span class="section-eyebrow">El problema</span>
+      <h2 id="problem-heading" class="problem__title">¿Te suena esto?</h2>
+      <p class="problem__subtitle">
+        Muchas PYMEs industriales siguen gestionando el mantenimiento con herramientas que no estaban diseñadas para ello.
+      </p>
+    </div>
+
+    <div class="problem__grid">
+      @for (point of painPoints; track point.title; let i = $index) {
+        <div
+          class="problem__card"
+          scrollAnimate
+          [scrollAnimateDelay]="i * 100"
+        >
+          <div class="problem__card-icon" aria-hidden="true">{{ point.icon }}</div>
+          <div class="problem__card-body">
+            <h3 class="problem__card-title">{{ point.title }}</h3>
+            <p class="problem__card-text">{{ point.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Transition arrow -->
+    <div class="problem__transition" scrollAnimate aria-hidden="true">
+      <div class="problem__transition-line"></div>
+      <div class="problem__transition-arrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12l7 7 7-7" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <p class="problem__transition-text">Existe una solución mejor</p>
+    </div>
+  </div>
+</section>

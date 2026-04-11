@@ -1,0 +1,39 @@
+using MediatR;
+using PlanTA.Produccion.Application.Features.Rutas.CreateRuta;
+using PlanTA.Produccion.Application.Features.Rutas.GetRuta;
+using PlanTA.Produccion.Application.Features.Rutas.ListRutas;
+using PlanTA.SharedKernel.Extensions;
+
+namespace PlanTA.API.Endpoints.Produccion;
+
+public sealed class RutasEndpoints : IEndpointGroup
+{
+    public string? RoutePrefix => "/api/v1/produccion/rutas";
+
+    public void MapEndpoints(RouteGroupBuilder group)
+    {
+        group.MapGet("/", async (string? search, int? page, int? pageSize, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new ListRutasQuery(search, page ?? 1, pageSize ?? 20), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("ListRutas")
+        .WithTags("Rutas");
+
+        group.MapGet("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new GetRutaQuery(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("GetRuta")
+        .WithTags("Rutas");
+
+        group.MapPost("/", async (CreateRutaCommand command, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(command, ct);
+            return result.ToHttpResult(201);
+        })
+        .WithName("CreateRuta")
+        .WithTags("Rutas");
+    }
+}

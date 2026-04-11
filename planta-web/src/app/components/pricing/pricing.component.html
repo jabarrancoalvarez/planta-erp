@@ -1,0 +1,102 @@
+<section class="pricing" id="pricing" aria-labelledby="pricing-heading">
+  <div class="container">
+    <div class="pricing__header" scrollAnimate>
+      <span class="section-eyebrow">Planes</span>
+      <h2 id="pricing-heading" class="pricing__title">
+        Simple, transparente, sin sorpresas
+      </h2>
+      <p class="pricing__subtitle">
+        Cancela cuando quieras. Sin permanencias. Sin letra pequeña.
+      </p>
+
+      <!-- Billing toggle -->
+      <div class="pricing__toggle" role="group" aria-label="Seleccionar facturación">
+        <button
+          class="pricing__toggle-option"
+          [class.active]="!isAnnual()"
+          (click)="isAnnual.set(false)"
+          type="button"
+          [attr.aria-pressed]="!isAnnual()"
+        >
+          Mensual
+        </button>
+        <button
+          class="pricing__toggle-switch"
+          (click)="toggleBilling()"
+          type="button"
+          [attr.aria-pressed]="isAnnual()"
+          aria-label="Cambiar a facturación anual"
+        >
+          <span class="pricing__toggle-thumb" [class.annual]="isAnnual()"></span>
+        </button>
+        <button
+          class="pricing__toggle-option"
+          [class.active]="isAnnual()"
+          (click)="isAnnual.set(true)"
+          type="button"
+          [attr.aria-pressed]="isAnnual()"
+        >
+          Anual
+          <span class="pricing__toggle-badge">−20%</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pricing__grid">
+      @for (plan of plans; track plan.name; let i = $index) {
+        <div
+          class="pricing-card"
+          [class.pricing-card--highlighted]="plan.highlighted"
+          scrollAnimate
+          [scrollAnimateDelay]="i * 100"
+        >
+          @if (plan.badge) {
+            <div class="pricing-card__badge">{{ plan.badge }}</div>
+          }
+
+          <div class="pricing-card__header">
+            <h3 class="pricing-card__name">{{ plan.name }}</h3>
+            <p class="pricing-card__description">{{ plan.description }}</p>
+          </div>
+
+          <div class="pricing-card__price" aria-live="polite">
+            <span class="pricing-card__currency">€</span>
+            <span class="pricing-card__amount">{{ getPrice(plan) }}</span>
+            <span class="pricing-card__period">/mes</span>
+          </div>
+
+          @if (isAnnual()) {
+            <p class="pricing-card__annual-note">
+              Facturado anualmente ({{getPrice(plan) * 12}}€/año)
+            </p>
+          }
+
+          <ul class="pricing-card__features" role="list">
+            @for (feature of plan.features; track feature) {
+              <li class="pricing-card__feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ feature }}
+              </li>
+            }
+          </ul>
+
+          <button
+            class="pricing-card__cta"
+            [class.btn-primary]="plan.highlighted"
+            [class.btn-secondary]="!plan.highlighted"
+            (click)="onPlanCta(plan)"
+            type="button"
+          >
+            {{ plan.cta }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <p class="pricing__footer-note" scrollAnimate>
+      Todos los planes incluyen 14 días de prueba gratuita. No se requiere tarjeta de crédito.
+    </p>
+  </div>
+</section>

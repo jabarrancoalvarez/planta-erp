@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: planta-api
+    env: docker
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:10000
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__Key
+        sync: false
+      - key: Jwt__Issuer
+        value: planta-api
+      - key: Jwt__Audience
+        value: planta-app
+      - key: Jwt__ExpiryMinutes
+        value: "60"
+      - key: Jwt__RefreshTokenExpiryDays
+        value: "7"
+      - key: Cors__AllowedOrigins
+        value: "https://planta-web.vercel.app"

@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm ci && npm run build -- --configuration production",
+  "outputDirectory": "dist/planta-web/browser",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

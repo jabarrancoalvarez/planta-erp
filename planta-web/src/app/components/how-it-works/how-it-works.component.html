@@ -1,0 +1,52 @@
+<section class="how-it-works" id="how-it-works" aria-labelledby="hiw-heading">
+  <div class="container">
+    <div class="how-it-works__header" scrollAnimate>
+      <span class="section-eyebrow">Proceso</span>
+      <h2 id="hiw-heading" class="how-it-works__title">
+        En marcha en menos de 48 horas
+      </h2>
+      <p class="how-it-works__subtitle">
+        Sin instalaciones complicadas ni meses de formación. Configura FixFlow y empieza a gestionar tu mantenimiento hoy mismo.
+      </p>
+    </div>
+
+    <div class="how-it-works__steps">
+      @for (step of steps; track step.number; let i = $index; let last = $last) {
+        <div
+          class="hiw-step"
+          scrollAnimate
+          [scrollAnimateDelay]="i * 120"
+        >
+          <div class="hiw-step__number" aria-hidden="true">{{ step.number }}</div>
+          <div class="hiw-step__icon-wrap" aria-hidden="true">
+            <span class="hiw-step__icon">{{ step.icon }}</span>
+          </div>
+          <div class="hiw-step__content">
+            <h3 class="hiw-step__title">{{ step.title }}</h3>
+            <p class="hiw-step__text">{{ step.description }}</p>
+          </div>
+        </div>
+
+        @if (!last) {
+          <div class="hiw-connector" aria-hidden="true">
+            <div class="hiw-connector__line"></div>
+            <svg class="hiw-connector__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Trust indicator -->
+    <div class="how-it-works__trust" scrollAnimate>
+      <div class="how-it-works__trust-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(16,185,129,0.1)"/>
+          <path d="M9 12l2 2 4-4" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Datos seguros · Cifrado SSL · RGPD compliant</span>
+      </div>
+    </div>
+  </div>
+</section>

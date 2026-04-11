@@ -1,0 +1,11 @@
+@use '../../../shared/styles/auth-layout' as *;
+
+.register-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.125rem;
+
+  @media (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}

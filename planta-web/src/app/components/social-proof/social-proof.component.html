@@ -1,0 +1,61 @@
+<section class="social-proof" id="social-proof" aria-labelledby="sp-heading">
+  <div class="container">
+    <div class="social-proof__header" scrollAnimate>
+      <span class="section-eyebrow">Clientes</span>
+      <h2 id="sp-heading" class="social-proof__title">
+        Más de 50 empresas ya digitalizan su mantenimiento con FixFlow
+      </h2>
+      <div class="social-proof__rating" aria-label="Valoración media: 4.9 de 5 estrellas">
+        <div class="social-proof__stars" aria-hidden="true">
+          @for (star of stars; track star) {
+            <span class="social-proof__star">⭐</span>
+          }
+        </div>
+        <strong class="social-proof__rating-value">4.9/5</strong>
+        <span class="social-proof__rating-label">valoración media</span>
+      </div>
+    </div>
+
+    <!-- Logo grid -->
+    <div class="social-proof__logos" scrollAnimate aria-label="Empresas que usan FixFlow">
+      @for (logo of logos; track logo.name) {
+        <div class="social-proof__logo-item">
+          <span class="social-proof__logo-text">{{ logo.name }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Testimonials -->
+    <div class="social-proof__testimonials">
+      @for (testimonial of testimonials; track testimonial.name; let i = $index) {
+        <article
+          class="testimonial-card"
+          scrollAnimate
+          [scrollAnimateDelay]="i * 120"
+          [attr.aria-label]="'Testimonio de ' + testimonial.name"
+        >
+          <div class="testimonial-card__quote-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"
+                fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <blockquote class="testimonial-card__text">{{ testimonial.quote }}</blockquote>
+          <footer class="testimonial-card__footer">
+            <div
+              class="testimonial-card__avatar"
+              [style.background]="testimonial.color"
+              aria-hidden="true"
+            >
+              {{ testimonial.initials }}
+            </div>
+            <div class="testimonial-card__meta">
+              <cite class="testimonial-card__name">{{ testimonial.name }}</cite>
+              <span class="testimonial-card__role">{{ testimonial.role }}, {{ testimonial.company }}</span>
+            </div>
+          </footer>
+        </article>
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,29 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.vs/
+logs/
+
+# Secrets
+appsettings.Development.json
+appsettings.Local.json
+.env
+.env.local
+**/API KEY*.txt
+
+# Node
+planta-web/node_modules/
+planta-web/dist/
+planta-web/.angular/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store

@@ -1,0 +1,203 @@
+<div class="page">
+  <div class="page__header">
+    <div>
+      <h1 class="page__title">Configuración</h1>
+      <p class="page__subtitle">Gestiona tu cuenta y preferencias</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="settings-layout">
+    <nav class="settings-nav" aria-label="Secciones de configuración">
+      @for (tab of [['profile','👤','Mi perfil'],['company','🏭','Empresa'],['notifications','🔔','Notificaciones'],['billing','💳','Facturación']]; track tab[0]) {
+        <button
+          class="settings-nav__item"
+          [class.active]="activeTab() === tab[0]"
+          (click)="setActiveTab(tab[0])"
+          type="button"
+        >
+          <span aria-hidden="true">{{ tab[1] }}</span>
+          {{ tab[2] }}
+        </button>
+      }
+    </nav>
+
+    <div class="settings-content">
+
+      <!-- Success toast -->
+      @if (saveSuccess()) {
+        <div class="settings-toast" role="status">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          Cambios guardados correctamente
+        </div>
+      }
+
+      <!-- Profile tab -->
+      @if (activeTab() === 'profile') {
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2 class="settings-card__title">Información personal</h2>
+          </div>
+          <div class="settings-avatar-section">
+            <div class="settings-avatar">{{ auth.userInitials() }}</div>
+            <div>
+              <button class="btn-outline-sm" type="button">Cambiar foto</button>
+              <p class="settings-hint">JPG, PNG o GIF. Máx. 2MB</p>
+            </div>
+          </div>
+          <form [formGroup]="profileForm" class="settings-form" (ngSubmit)="onSave()">
+            <div class="settings-form__row">
+              <div class="form-group">
+                <label class="settings-label">Nombre completo</label>
+                <input type="text" class="settings-input" formControlName="name"/>
+              </div>
+              <div class="form-group">
+                <label class="settings-label">Email</label>
+                <input type="email" class="settings-input" formControlName="email"/>
+              </div>
+            </div>
+            <div class="settings-form__row">
+              <div class="form-group">
+                <label class="settings-label">Rol</label>
+                <input type="text" class="settings-input" formControlName="role" [readonly]="true" style="background:var(--color-gray-100)"/>
+              </div>
+              <div class="form-group">
+                <label class="settings-label">Teléfono</label>
+                <input type="tel" class="settings-input" formControlName="phone"/>
+              </div>
+            </div>
+            <div class="settings-form__actions">
+              <button type="submit" class="btn-primary">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="settings-card settings-card--danger">
+          <div class="settings-card__header">
+            <h2 class="settings-card__title">Zona de peligro</h2>
+          </div>
+          <div class="danger-zone">
+            <div>
+              <p class="danger-zone__title">Cambiar contraseña</p>
+              <p class="danger-zone__desc">Recibirás un email con las instrucciones</p>
+            </div>
+            <button class="btn-outline-sm btn-outline-sm--danger" type="button">Cambiar contraseña</button>
+          </div>
+          <div class="danger-zone">
+            <div>
+              <p class="danger-zone__title">Cerrar sesión en todos los dispositivos</p>
+              <p class="danger-zone__desc">Invalida todos los tokens de sesión activos</p>
+            </div>
+            <button class="btn-outline-sm btn-outline-sm--danger" type="button">Cerrar todas las sesiones</button>
+          </div>
+        </div>
+      }
+
+      <!-- Company tab -->
+      @if (activeTab() === 'company') {
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2 class="settings-card__title">Datos de la empresa</h2>
+          </div>
+          <form [formGroup]="companyForm" class="settings-form" (ngSubmit)="onSave()">
+            <div class="settings-form__row">
+              <div class="form-group">
+                <label class="settings-label">Nombre de empresa</label>
+                <input type="text" class="settings-input" formControlName="company"/>
+              </div>
+              <div class="form-group">
+                <label class="settings-label">Sector</label>
+                <input type="text" class="settings-input" formControlName="sector"/>
+              </div>
+            </div>
+            <div class="settings-form__row">
+              <div class="form-group">
+                <label class="settings-label">Tamaño</label>
+                <input type="text" class="settings-input" formControlName="size"/>
+              </div>
+              <div class="form-group">
+                <label class="settings-label">Dirección</label>
+                <input type="text" class="settings-input" formControlName="address"/>
+              </div>
+            </div>
+            <div class="settings-form__actions">
+              <button type="submit" class="btn-primary">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Notifications tab -->
+      @if (activeTab() === 'notifications') {
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2 class="settings-card__title">Notificaciones por email</h2>
+          </div>
+          <form [formGroup]="notifForm" class="settings-form" (ngSubmit)="onSave()">
+            <div class="notif-list">
+              <div class="notif-item">
+                <div>
+                  <p class="notif-item__title">Nuevas incidencias</p>
+                  <p class="notif-item__desc">Cuando se crea una incidencia de alta prioridad</p>
+                </div>
+                <input type="checkbox" class="notif-toggle" formControlName="emailIncidents"/>
+              </div>
+              <div class="notif-item">
+                <div>
+                  <p class="notif-item__title">Recordatorios de mantenimiento</p>
+                  <p class="notif-item__desc">7 días antes de la fecha programada</p>
+                </div>
+                <input type="checkbox" class="notif-toggle" formControlName="emailMaintenance"/>
+              </div>
+              <div class="notif-item">
+                <div>
+                  <p class="notif-item__title">Informes semanales</p>
+                  <p class="notif-item__desc">Resumen cada lunes a las 9:00</p>
+                </div>
+                <input type="checkbox" class="notif-toggle" formControlName="emailReports"/>
+              </div>
+            </div>
+            <div class="settings-form__actions">
+              <button type="submit" class="btn-primary">Guardar preferencias</button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Billing tab -->
+      @if (activeTab() === 'billing') {
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2 class="settings-card__title">Plan actual</h2>
+          </div>
+          <div class="billing-plan">
+            <div class="billing-plan__info">
+              <span class="billing-plan__name">Plan Profesional</span>
+              <span class="billing-plan__price">79€ / mes</span>
+              <span class="billing-plan__desc">Próxima factura: 1 de abril de 2026</span>
+            </div>
+            <button class="btn-primary" type="button">Cambiar plan</button>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <h2 class="settings-card__title">Historial de facturas</h2>
+          </div>
+          <div class="invoice-list">
+            @for (inv of [['Mar 2026','79€'],['Feb 2026','79€'],['Ene 2026','79€']]; track inv[0]) {
+              <div class="invoice-row">
+                <span class="invoice-date">{{ inv[0] }}</span>
+                <span class="invoice-amount">{{ inv[1] }}</span>
+                <span class="invoice-status">Pagada</span>
+                <button class="btn-link" type="button">Descargar PDF</button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

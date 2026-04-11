@@ -1,0 +1,35 @@
+<section class="solution" id="solution" aria-labelledby="solution-heading">
+  <div class="container">
+    <div class="solution__header" scrollAnimate>
+      <span class="section-eyebrow">La solución</span>
+      <h2 id="solution-heading" class="solution__title">
+        Una plataforma para tenerlo todo bajo control
+      </h2>
+      <p class="solution__subtitle">
+        FixFlow centraliza toda la gestión de mantenimiento de tu empresa en una sola herramienta,
+        accesible desde cualquier dispositivo.
+      </p>
+    </div>
+
+    <div class="solution__grid">
+      @for (feature of features; track feature.title; let i = $index) {
+        <div
+          class="solution__card"
+          scrollAnimate
+          [scrollAnimateDelay]="(i % 3) * 80"
+        >
+          <div class="solution__card-icon-wrap" aria-hidden="true">
+            <span class="solution__card-icon">{{ feature.icon }}</span>
+          </div>
+          <h3 class="solution__card-title">{{ feature.title }}</h3>
+          <p class="solution__card-text">{{ feature.description }}</p>
+          <div class="solution__card-arrow" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

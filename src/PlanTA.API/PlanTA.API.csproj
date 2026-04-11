@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlanTA.SharedKernel\PlanTA.SharedKernel.csproj" />
+    <ProjectReference Include="..\PlanTA.Seguridad.Application\PlanTA.Seguridad.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Seguridad.Infrastructure\PlanTA.Seguridad.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Inventario.Application\PlanTA.Inventario.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Inventario.Infrastructure\PlanTA.Inventario.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Produccion.Application\PlanTA.Produccion.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Produccion.Infrastructure\PlanTA.Produccion.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Compras.Application\PlanTA.Compras.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Compras.Infrastructure\PlanTA.Compras.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Ventas.Application\PlanTA.Ventas.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Ventas.Infrastructure\PlanTA.Ventas.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Calidad.Application\PlanTA.Calidad.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Calidad.Infrastructure\PlanTA.Calidad.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
