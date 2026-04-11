@@ -34,9 +34,12 @@ builder.Host.UseSerilog((context, config) =>
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblies(
-        AppDomain.CurrentDomain.GetAssemblies()
-            .Where(a => a.FullName?.Contains("PlanTA") == true)
-            .ToArray());
+        typeof(PlanTA.Seguridad.Application.Features.Auth.Login.LoginCommand).Assembly,
+        typeof(PlanTA.Inventario.Application.Features.Alertas.CreateAlerta.CreateAlertaCommand).Assembly,
+        typeof(PlanTA.Produccion.Application.Features.BOM.AddLineaBOM.AddLineaBOMCommand).Assembly,
+        typeof(PlanTA.Compras.Application.Features.OrdenesCompra.AddLineaOC.AddLineaOCCommand).Assembly,
+        typeof(PlanTA.Ventas.Application.Features.Clientes.CreateCliente.CreateClienteCommand).Assembly,
+        typeof(PlanTA.Calidad.Application.Features.Inspecciones.CompletarInspeccion.CompletarInspeccionCommand).Assembly);
 
     cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
     cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
@@ -204,16 +207,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // -- Middleware pipeline --
-app.UseExceptionHandler(appError =>
-{
-    appError.Run(async context =>
-    {
-        var ex = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = 500;
-        await context.Response.WriteAsJsonAsync(new { error = ex?.Message, stack = ex?.StackTrace });
-    });
-});
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
