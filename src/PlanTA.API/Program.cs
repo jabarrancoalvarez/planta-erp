@@ -1,7 +1,16 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PlanTA.API.Endpoints;
 using PlanTA.API.Infrastructure;
 using PlanTA.API.Middleware;
+using PlanTA.Calidad.Infrastructure.Data;
+using PlanTA.Compras.Infrastructure.Data;
+using PlanTA.Inventario.Infrastructure.Data;
+using PlanTA.Produccion.Infrastructure.Data;
+using PlanTA.Seguridad.Domain.Entities;
+using PlanTA.Seguridad.Infrastructure.Data;
+using PlanTA.Seguridad.Infrastructure.Identity;
+using PlanTA.Ventas.Infrastructure.Data;
 using PlanTA.Calidad.Infrastructure;
 using PlanTA.Compras.Infrastructure;
 using PlanTA.Inventario.Infrastructure;
@@ -115,7 +124,7 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// -- Ensure shared schema exists --
+// -- Ensure schemas exist & seed data --
 using (var scope = app.Services.CreateScope())
 {
     var outboxDb = scope.ServiceProvider.GetRequiredService<OutboxDbContext>();
@@ -123,6 +132,55 @@ using (var scope = app.Services.CreateScope())
 
     var auditDb = scope.ServiceProvider.GetRequiredService<AuditDbContext>();
     await auditDb.Database.EnsureCreatedAsync();
+
+    var segDb = scope.ServiceProvider.GetRequiredService<SeguridadDbContext>();
+    await segDb.Database.EnsureCreatedAsync();
+
+    await scope.ServiceProvider.GetRequiredService<InventarioDbContext>().Database.EnsureCreatedAsync();
+    await scope.ServiceProvider.GetRequiredService<ProduccionDbContext>().Database.EnsureCreatedAsync();
+    await scope.ServiceProvider.GetRequiredService<ComprasDbContext>().Database.EnsureCreatedAsync();
+    await scope.ServiceProvider.GetRequiredService<VentasDbContext>().Database.EnsureCreatedAsync();
+    await scope.ServiceProvider.GetRequiredService<CalidadDbContext>().Database.EnsureCreatedAsync();
+
+    // Seed roles
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    string[] roles = ["Administrador", "GerentePlanta", "JefeAlmacen", "JefeProduccion", "Compras", "Ventas", "Calidad", "Operario"];
+    foreach (var rol in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(rol))
+            await roleManager.CreateAsync(new IdentityRole<Guid> { Name = rol });
+    }
+
+    // Seed empresa
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    if (!await userManager.Users.AnyAsync())
+    {
+        var empresa = Empresa.Crear("PlanTA Demo", "B12345678", "demo@planta-erp.com");
+        segDb.Empresas.Add(empresa);
+        await segDb.SaveChangesAsync();
+
+        // Seed users
+        var seedUsers = new[]
+        {
+            ("admin@planta-erp.com", "Admin2026!!", "Administrador", "Administrador"),
+            ("gerente@planta-erp.com", "Gerente2026!!", "Gerente de Planta", "GerentePlanta"),
+            ("calidad@planta-erp.com", "Calidad2026!!", "Jefe de Calidad", "Calidad"),
+            ("operario@planta-erp.com", "Operario2026!!", "Operario Demo", "Operario"),
+        };
+
+        foreach (var (email, password, nombre, rol) in seedUsers)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                Nombre = nombre,
+                EmpresaId = empresa.Id.Value
+            };
+            var res = await userManager.CreateAsync(user, password);
+            if (res.Succeeded) await userManager.AddToRoleAsync(user, rol);
+        }
+    }
 }
 
 // -- Middleware pipeline --
