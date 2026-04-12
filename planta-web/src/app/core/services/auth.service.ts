@@ -8,6 +8,35 @@ import { environment } from '../../../environments/environment';
 const TOKEN_KEY = 'planta_access_token';
 const USER_KEY = 'planta_user';
 
+interface BackendUserDto {
+  id: string;
+  email: string;
+  nombre?: string;
+  rol?: string;
+  empresaId?: string;
+  empresaNombre?: string;
+  name?: string;
+  role?: string;
+  company?: string;
+}
+
+interface BackendAuthResponse {
+  accessToken?: string;
+  refreshToken?: string;
+  token?: string;
+  user: BackendUserDto;
+}
+
+function mapUser(dto: BackendUserDto): User {
+  return {
+    id: dto.id,
+    email: dto.email,
+    name: dto.nombre ?? dto.name ?? dto.email ?? '',
+    role: (dto.rol ?? dto.role ?? 'Operario') as User['role'],
+    company: dto.empresaNombre ?? dto.company ?? '',
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
@@ -25,7 +54,9 @@ export class AuthService {
   readonly userInitials = computed(() => {
     const user = this._currentUser();
     if (!user) return '';
-    return user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const source = (user.name ?? user.email ?? '').trim();
+    if (!source) return '';
+    return source.split(/\s+/).map(n => n[0] ?? '').join('').toUpperCase().slice(0, 2);
   });
 
   async login(credentials: LoginCredentials): Promise<boolean> {
@@ -34,14 +65,16 @@ export class AuthService {
 
     try {
       const response = await firstValueFrom(
-        this.http.post<AuthResponse>(`${this.apiUrl}/seguridad/auth/login`, {
+        this.http.post<BackendAuthResponse>(`${this.apiUrl}/seguridad/auth/login`, {
           email: credentials.email,
           password: credentials.password,
         })
       );
 
-      this.persistSession(response.token, response.user);
-      this._currentUser.set(response.user);
+      const token = response.accessToken ?? response.token ?? '';
+      const user = mapUser(response.user);
+      this.persistSession(token, user);
+      this._currentUser.set(user);
       return true;
     } catch (err: any) {
       const message = err?.error?.message ?? err?.message ?? 'Error al iniciar sesion';
@@ -58,16 +91,18 @@ export class AuthService {
 
     try {
       const response = await firstValueFrom(
-        this.http.post<AuthResponse>(`${this.apiUrl}/seguridad/auth/register`, {
-          name: data.name,
+        this.http.post<BackendAuthResponse>(`${this.apiUrl}/seguridad/auth/register`, {
+          nombre: data.name,
           email: data.email,
           password: data.password,
-          company: data.company,
+          empresaNombre: data.company,
         })
       );
 
-      this.persistSession(response.token, response.user);
-      this._currentUser.set(response.user);
+      const token = response.accessToken ?? response.token ?? '';
+      const user = mapUser(response.user);
+      this.persistSession(token, user);
+      this._currentUser.set(user);
       return true;
     } catch (err: any) {
       const message = err?.error?.message ?? err?.message ?? 'Error al crear la cuenta';
@@ -120,7 +155,9 @@ export class AuthService {
   private loadUserFromStorage(): User | null {
     try {
       const raw = localStorage.getItem(USER_KEY);
-      return raw ? (JSON.parse(raw) as User) : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as BackendUserDto;
+      return mapUser(parsed);
     } catch {
       return null;
     }
