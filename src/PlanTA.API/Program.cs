@@ -3,9 +3,29 @@ using Microsoft.EntityFrameworkCore;
 using PlanTA.API.Endpoints;
 using PlanTA.API.Infrastructure;
 using PlanTA.API.Middleware;
+using PlanTA.Activos.Infrastructure;
+using PlanTA.Activos.Infrastructure.Data;
 using PlanTA.Calidad.Infrastructure.Data;
 using PlanTA.Compras.Infrastructure.Data;
+using PlanTA.Incidencias.Infrastructure;
+using PlanTA.Incidencias.Infrastructure.Data;
+using PlanTA.RRHH.Infrastructure;
+using PlanTA.RRHH.Infrastructure.Data;
+using PlanTA.Costes.Infrastructure;
+using PlanTA.Costes.Infrastructure.Data;
+using PlanTA.Importador.Infrastructure;
+using PlanTA.Importador.Infrastructure.Data;
+using PlanTA.CRM.Infrastructure;
+using PlanTA.CRM.Infrastructure.Data;
+using PlanTA.Facturacion.Infrastructure;
+using PlanTA.Facturacion.Infrastructure.Data;
+using PlanTA.OEE.Infrastructure;
+using PlanTA.OEE.Infrastructure.Data;
+using PlanTA.IA.Infrastructure;
+using PlanTA.IA.Infrastructure.Data;
 using PlanTA.Inventario.Infrastructure.Data;
+using PlanTA.Mantenimiento.Infrastructure;
+using PlanTA.Mantenimiento.Infrastructure.Data;
 using PlanTA.Produccion.Infrastructure.Data;
 using PlanTA.Seguridad.Domain.Entities;
 using PlanTA.Seguridad.Infrastructure.Data;
@@ -39,7 +59,17 @@ builder.Services.AddMediatR(cfg =>
         typeof(PlanTA.Produccion.Application.Features.BOM.AddLineaBOM.AddLineaBOMCommand).Assembly,
         typeof(PlanTA.Compras.Application.Features.OrdenesCompra.AddLineaOC.AddLineaOCCommand).Assembly,
         typeof(PlanTA.Ventas.Application.Features.Clientes.CreateCliente.CreateClienteCommand).Assembly,
-        typeof(PlanTA.Calidad.Application.Features.Inspecciones.CompletarInspeccion.CompletarInspeccionCommand).Assembly);
+        typeof(PlanTA.Calidad.Application.Features.Inspecciones.CompletarInspeccion.CompletarInspeccionCommand).Assembly,
+        typeof(PlanTA.Activos.Application.Features.Activos.CreateActivo.CreateActivoCommand).Assembly,
+        typeof(PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.CreateOrdenTrabajo.CreateOrdenTrabajoCommand).Assembly,
+        typeof(PlanTA.Incidencias.Application.Features.Incidencias.CreateIncidencia.CreateIncidenciaCommand).Assembly,
+        typeof(PlanTA.RRHH.Application.Features.Empleados.CreateEmpleado.CreateEmpleadoCommand).Assembly,
+        typeof(PlanTA.Costes.Application.Features.Imputaciones.CreateImputacion.CreateImputacionCommand).Assembly,
+        typeof(PlanTA.Importador.Application.Features.Jobs.CreateJob.CreateImportJobCommand).Assembly,
+        typeof(PlanTA.CRM.Application.Features.Leads.CreateLead.CreateLeadCommand).Assembly,
+        typeof(PlanTA.Facturacion.Application.Features.Facturas.CreateFactura.CreateFacturaCommand).Assembly,
+        typeof(PlanTA.OEE.Application.Features.Registros.RegistrarOEE.RegistrarOEECommand).Assembly,
+        typeof(PlanTA.IA.Application.Features.Chat.EnviarMensaje.EnviarMensajeCommand).Assembly);
 
     cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
     cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
@@ -124,6 +154,36 @@ builder.Services.AddVentasInfrastructure(builder.Configuration);
 // -- Modulo Calidad --
 builder.Services.AddCalidadInfrastructure(builder.Configuration);
 
+// -- Modulo Activos --
+builder.Services.AddActivosInfrastructure(builder.Configuration);
+
+// -- Modulo Mantenimiento --
+builder.Services.AddMantenimientoInfrastructure(builder.Configuration);
+
+// -- Modulo Incidencias --
+builder.Services.AddIncidenciasInfrastructure(builder.Configuration);
+
+// -- Modulo RRHH --
+builder.Services.AddRRHHInfrastructure(builder.Configuration);
+
+// -- Modulo Costes --
+builder.Services.AddCostesInfrastructure(builder.Configuration);
+
+// -- Modulo Importador --
+builder.Services.AddImportadorInfrastructure(builder.Configuration);
+
+// -- Modulo CRM --
+builder.Services.AddCrmInfrastructure(builder.Configuration);
+
+// -- Modulo Facturacion --
+builder.Services.AddFacturacionInfrastructure(builder.Configuration);
+
+// -- Modulo OEE --
+builder.Services.AddOEEInfrastructure(builder.Configuration);
+
+// -- Modulo IA --
+builder.Services.AddIAInfrastructure(builder.Configuration);
+
 // -- Authorization --
 builder.Services.AddAuthorization();
 
@@ -164,6 +224,16 @@ using (var scope = app.Services.CreateScope())
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ComprasDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<VentasDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<CalidadDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ActivosDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<MantenimientoDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<IncidenciasDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<RRHHDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<CostesDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ImportadorDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<CrmDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<FacturacionDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<OEEDbContext>());
+    await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<IADbContext>());
 
     // Seed roles
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();

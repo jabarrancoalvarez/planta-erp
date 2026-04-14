@@ -14,6 +14,26 @@
     <ProjectReference Include="..\PlanTA.Ventas.Infrastructure\PlanTA.Ventas.Infrastructure.csproj" />
     <ProjectReference Include="..\PlanTA.Calidad.Application\PlanTA.Calidad.Application.csproj" />
     <ProjectReference Include="..\PlanTA.Calidad.Infrastructure\PlanTA.Calidad.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Activos.Application\PlanTA.Activos.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Activos.Infrastructure\PlanTA.Activos.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Mantenimiento.Application\PlanTA.Mantenimiento.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Mantenimiento.Infrastructure\PlanTA.Mantenimiento.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Incidencias.Application\PlanTA.Incidencias.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Incidencias.Infrastructure\PlanTA.Incidencias.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.RRHH.Application\PlanTA.RRHH.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.RRHH.Infrastructure\PlanTA.RRHH.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Costes.Application\PlanTA.Costes.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Costes.Infrastructure\PlanTA.Costes.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Importador.Application\PlanTA.Importador.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Importador.Infrastructure\PlanTA.Importador.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.CRM.Application\PlanTA.CRM.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.CRM.Infrastructure\PlanTA.CRM.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.Facturacion.Application\PlanTA.Facturacion.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.Facturacion.Infrastructure\PlanTA.Facturacion.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.OEE.Application\PlanTA.OEE.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.OEE.Infrastructure\PlanTA.OEE.Infrastructure.csproj" />
+    <ProjectReference Include="..\PlanTA.IA.Application\PlanTA.IA.Application.csproj" />
+    <ProjectReference Include="..\PlanTA.IA.Infrastructure\PlanTA.IA.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
