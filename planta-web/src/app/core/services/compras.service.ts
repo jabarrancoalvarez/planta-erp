@@ -118,6 +118,10 @@ export class ComprasService {
     return this.api.put(`/compras/ordenes/${id}/estado`, { estadoDestino, motivo });
   }
 
+  deleteOC(id: string): Observable<string> {
+    return this.api.delete(`/compras/ordenes/${id}`);
+  }
+
   listRecepciones(ordenCompraId?: string, estado?: string, page = 1, pageSize = 20): Observable<PagedResult<RecepcionListDto>> {
     return this.api.get('/compras/recepciones', { ordenCompraId, estado, page, pageSize });
   }

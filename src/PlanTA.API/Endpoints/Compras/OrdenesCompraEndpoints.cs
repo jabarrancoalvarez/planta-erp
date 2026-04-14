@@ -2,6 +2,7 @@ using MediatR;
 using PlanTA.Compras.Application.Features.OrdenesCompra.AddLineaOC;
 using PlanTA.Compras.Application.Features.OrdenesCompra.CambiarEstadoOC;
 using PlanTA.Compras.Application.Features.OrdenesCompra.CreateOC;
+using PlanTA.Compras.Application.Features.OrdenesCompra.DeleteOC;
 using PlanTA.Compras.Application.Features.OrdenesCompra.GetOC;
 using PlanTA.Compras.Application.Features.OrdenesCompra.ListOCs;
 using PlanTA.Compras.Domain.Enums;
@@ -54,6 +55,14 @@ public sealed class OrdenesCompraEndpoints : IEndpointGroup
             return result.ToHttpResult();
         })
         .WithName("CambiarEstadoOC")
+        .WithTags("OrdenesCompra");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteOCCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteOrdenCompra")
         .WithTags("OrdenesCompra");
     }
 }
