@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ActivosService, ActivoListDto } from '../../core/services/activos.service';
 
 @Component({
@@ -35,7 +36,7 @@ import { ActivosService, ActivoListDto } from '../../core/services/activos.servi
             </thead>
             <tbody>
               @for (a of items(); track a.id) {
-                <tr>
+                <tr style="cursor:pointer;" (click)="goToDetail(a.id)">
                   <td><code>{{ a.codigo }}</code></td>
                   <td>{{ a.nombre }}</td>
                   <td>{{ a.tipo }}</td>
@@ -55,6 +56,7 @@ import { ActivosService, ActivoListDto } from '../../core/services/activos.servi
 })
 export class ActivosListComponent implements OnInit {
   private svc = inject(ActivosService);
+  private router = inject(Router);
   readonly items = signal<ActivoListDto[]>([]);
   readonly loading = signal(true);
   private searchTimeout: any;
@@ -65,6 +67,10 @@ export class ActivosListComponent implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => this.load(value), 300);
+  }
+
+  goToDetail(id: string): void {
+    this.router.navigate(['/app/activos', id]);
   }
 
   private load(search?: string): void {
