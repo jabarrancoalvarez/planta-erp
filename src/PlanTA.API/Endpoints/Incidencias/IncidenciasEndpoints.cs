@@ -1,6 +1,7 @@
 using MediatR;
 using PlanTA.Incidencias.Application.Features.Incidencias.CerrarIncidencia;
 using PlanTA.Incidencias.Application.Features.Incidencias.CreateIncidencia;
+using PlanTA.Incidencias.Application.Features.Incidencias.DeleteIncidencia;
 using PlanTA.Incidencias.Application.Features.Incidencias.ListIncidencias;
 using PlanTA.Incidencias.Domain.Enums;
 using PlanTA.SharedKernel.Extensions;
@@ -32,6 +33,12 @@ public sealed class IncidenciasEndpoints : IEndpointGroup
             var result = await m.Send(new CerrarIncidenciaCommand(id, req.CausaRaiz, req.ResolucionNotas), ct);
             return result.ToHttpResult();
         }).WithName("CerrarIncidencia").WithTags("Incidencias");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteIncidenciaCommand(id), ct);
+            return result.ToHttpResult();
+        }).WithName("DeleteIncidencia").WithTags("Incidencias");
     }
 }
 

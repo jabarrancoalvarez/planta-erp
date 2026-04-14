@@ -59,4 +59,8 @@ export class IncidenciasService {
   cerrarIncidencia(id: string, req: CerrarIncidenciaRequest): Observable<string> {
     return this.api.post<string>(`/incidencias/${id}/cerrar`, req);
   }
+
+  deleteIncidencia(id: string): Observable<string> {
+    return this.api.delete<string>(`/incidencias/${id}`);
+  }
 }
