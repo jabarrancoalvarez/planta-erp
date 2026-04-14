@@ -17,10 +17,10 @@ public sealed class ListAlmacenesQueryHandler(
         var almacenes = await db.Almacenes
             .AsNoTracking()
             .Where(a => a.EmpresaId == tenant.EmpresaId)
+            .OrderBy(a => a.Nombre)
             .Select(a => new AlmacenListDto(
                 a.Id.Value, a.Nombre, a.Direccion, a.EsPrincipal,
                 a.Ubicaciones.Count))
-            .OrderBy(a => a.Nombre)
             .ToListAsync(cancellationToken);
 
         return Result<List<AlmacenListDto>>.Success(almacenes);
