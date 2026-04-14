@@ -115,6 +115,10 @@ export class ProduccionService {
     return this.api.put(`/produccion/ordenes/${id}/estado`, { estadoDestino, motivo });
   }
 
+  deleteOF(id: string): Observable<string> {
+    return this.api.delete(`/produccion/ordenes/${id}`);
+  }
+
   registrarProduccion(id: string, data: { cantidadProducida: number; observaciones?: string }): Observable<string> {
     return this.api.post(`/produccion/ordenes/${id}/produccion`, data);
   }

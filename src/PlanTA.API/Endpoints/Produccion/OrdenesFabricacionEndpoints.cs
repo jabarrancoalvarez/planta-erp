@@ -1,6 +1,7 @@
 using MediatR;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.CambiarEstadoOF;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.CreateOF;
+using PlanTA.Produccion.Application.Features.OrdenesFabricacion.DeleteOF;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.GetOF;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.ListOFs;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.RegistrarProduccion;
@@ -54,6 +55,14 @@ public sealed class OrdenesFabricacionEndpoints : IEndpointGroup
             return result.ToHttpResult(201);
         })
         .WithName("RegistrarProduccion")
+        .WithTags("OrdenesFabricacion");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteOFCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteOrdenFabricacion")
         .WithTags("OrdenesFabricacion");
     }
 }

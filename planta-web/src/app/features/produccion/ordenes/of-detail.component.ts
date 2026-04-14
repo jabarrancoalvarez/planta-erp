@@ -14,6 +14,9 @@ import { NotificationService } from '../../../shared/components/toast/notificati
       <div class="detail-page__header">
         <button class="detail-page__back" (click)="goBack()">&larr; Volver</button>
         <h1 class="detail-page__title">Orden de Fabricacion</h1>
+        @if (item()) {
+          <button class="detail-page__back" style="margin-left:auto;background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
+        }
       </div>
 
       @if (loading()) {
@@ -123,6 +126,16 @@ export class OFDetailComponent implements OnInit {
     this.svc.cambiarEstadoOF(this.id, estadoDestino).subscribe({
       next: () => { this.notify.success(`Estado cambiado a ${estadoDestino}`); this.loadDetail(); },
       error: (err) => this.notify.error(err?.error?.message ?? 'Error al cambiar estado'),
+    });
+  }
+
+  onDelete(): void {
+    const of = this.item();
+    if (!of) return;
+    if (!confirm(`¿Eliminar orden de fabricación "${of.codigoOF}"?`)) return;
+    this.svc.deleteOF(this.id).subscribe({
+      next: () => this.router.navigate(['/app/produccion/ordenes']),
+      error: (err) => this.notify.error(err?.error?.message ?? 'Error al eliminar'),
     });
   }
 
