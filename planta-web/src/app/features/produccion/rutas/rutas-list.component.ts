@@ -1,5 +1,6 @@
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ProduccionService, RutaListDto } from '../../../core/services/produccion.service';
 
 @Component({
@@ -38,7 +39,7 @@ import { ProduccionService, RutaListDto } from '../../../core/services/produccio
             </thead>
             <tbody>
               @for (item of items(); track item.id) {
-                <tr>
+                <tr style="cursor:pointer;" (click)="goToDetail(item.id)">
                   <td>{{ item.nombre }}</td>
                   <td>{{ item.numeroOperaciones }}</td>
                   <td>
@@ -60,6 +61,7 @@ import { ProduccionService, RutaListDto } from '../../../core/services/produccio
 })
 export class RutasListComponent implements OnInit {
   private svc = inject(ProduccionService);
+  private router = inject(Router);
 
   readonly items = signal<RutaListDto[]>([]);
   readonly totalCount = signal(0);
@@ -75,6 +77,10 @@ export class RutasListComponent implements OnInit {
     clearTimeout(this.searchTimeout);
     const term = (event.target as HTMLInputElement).value;
     this.searchTimeout = setTimeout(() => this.load(term), 300);
+  }
+
+  goToDetail(id: string): void {
+    this.router.navigate(['/app/produccion/rutas', id]);
   }
 
   private load(search?: string): void {

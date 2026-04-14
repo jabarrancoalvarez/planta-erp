@@ -40,6 +40,26 @@ export interface RutaListDto {
   numeroOperaciones: number;
 }
 
+export interface OperacionRutaDto {
+  id: string;
+  numero: number;
+  nombre: string;
+  tipoOperacion: string;
+  tiempoEstimadoMinutos: number;
+  centroTrabajo: string;
+  instrucciones: string | null;
+}
+
+export interface RutaDetailDto {
+  id: string;
+  productoId: string;
+  nombre: string;
+  descripcion: string | null;
+  activa: boolean;
+  createdAt: string;
+  operaciones: OperacionRutaDto[];
+}
+
 export interface OFListDto {
   id: string;
   codigoOF: string;
@@ -90,6 +110,14 @@ export class ProduccionService {
 
   listRutas(search?: string, page = 1, pageSize = 20): Observable<PagedResult<RutaListDto>> {
     return this.api.get('/produccion/rutas', { search, page, pageSize });
+  }
+
+  getRuta(id: string): Observable<RutaDetailDto> {
+    return this.api.get(`/produccion/rutas/${id}`);
+  }
+
+  deleteRuta(id: string): Observable<string> {
+    return this.api.delete(`/produccion/rutas/${id}`);
   }
 
   listOFs(search?: string, estado?: string, page = 1, pageSize = 20): Observable<PagedResult<OFListDto>> {
