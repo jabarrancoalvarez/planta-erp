@@ -94,6 +94,10 @@ export class ComprasService {
     return this.api.put(`/compras/proveedores/${id}`, data);
   }
 
+  deleteProveedor(id: string): Observable<string> {
+    return this.api.delete(`/compras/proveedores/${id}`);
+  }
+
   listOCs(search?: string, estado?: string, page = 1, pageSize = 20): Observable<PagedResult<OCListDto>> {
     return this.api.get('/compras/ordenes', { search, estado, page, pageSize });
   }

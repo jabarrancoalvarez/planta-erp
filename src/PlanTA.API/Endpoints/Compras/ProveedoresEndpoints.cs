@@ -1,5 +1,6 @@
 using MediatR;
 using PlanTA.Compras.Application.Features.Proveedores.CreateProveedor;
+using PlanTA.Compras.Application.Features.Proveedores.DeleteProveedor;
 using PlanTA.Compras.Application.Features.Proveedores.GetProveedor;
 using PlanTA.Compras.Application.Features.Proveedores.ListProveedores;
 using PlanTA.Compras.Application.Features.Proveedores.UpdateProveedor;
@@ -47,6 +48,14 @@ public sealed class ProveedoresEndpoints : IEndpointGroup
             return result.ToHttpResult();
         })
         .WithName("UpdateProveedor")
+        .WithTags("Proveedores");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteProveedorCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteProveedor")
         .WithTags("Proveedores");
     }
 }

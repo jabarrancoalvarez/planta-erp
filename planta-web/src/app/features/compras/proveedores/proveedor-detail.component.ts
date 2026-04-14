@@ -13,6 +13,9 @@ import { ComprasService, ProveedorDetailDto } from '../../../core/services/compr
       <div class="detail-page__header">
         <button class="detail-page__back" (click)="goBack()">&larr; Volver</button>
         <h1 class="detail-page__title">Detalle de Proveedor</h1>
+        @if (item()) {
+          <button class="detail-page__back" style="margin-left:auto;background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
+        }
       </div>
 
       @if (loading()) {
@@ -115,4 +118,14 @@ export class ProveedorDetailComponent implements OnInit {
   }
 
   goBack(): void { this.router.navigate(['/app/compras/proveedores']); }
+
+  onDelete(): void {
+    const p = this.item();
+    if (!p) return;
+    if (!confirm(`¿Eliminar proveedor "${p.razonSocial}"?`)) return;
+    this.svc.deleteProveedor(p.id).subscribe({
+      next: () => this.router.navigate(['/app/compras/proveedores']),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 }

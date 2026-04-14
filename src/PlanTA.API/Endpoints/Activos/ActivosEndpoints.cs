@@ -1,6 +1,7 @@
 using MediatR;
 using PlanTA.Activos.Application.Features.Activos.CambiarEstado;
 using PlanTA.Activos.Application.Features.Activos.CreateActivo;
+using PlanTA.Activos.Application.Features.Activos.DeleteActivo;
 using PlanTA.Activos.Application.Features.Activos.GetActivo;
 using PlanTA.Activos.Application.Features.Activos.ListActivos;
 using PlanTA.Activos.Domain.Enums;
@@ -38,6 +39,12 @@ public sealed class ActivosEndpoints : IEndpointGroup
             var result = await m.Send(new CambiarEstadoActivoCommand(id, req.Estado), ct);
             return result.ToHttpResult();
         }).WithName("CambiarEstadoActivo").WithTags("Activos");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteActivoCommand(id), ct);
+            return result.ToHttpResult();
+        }).WithName("DeleteActivo").WithTags("Activos");
     }
 }
 

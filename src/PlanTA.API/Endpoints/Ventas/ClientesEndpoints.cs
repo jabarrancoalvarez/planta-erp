@@ -1,5 +1,6 @@
 using MediatR;
 using PlanTA.Ventas.Application.Features.Clientes.CreateCliente;
+using PlanTA.Ventas.Application.Features.Clientes.DeleteCliente;
 using PlanTA.Ventas.Application.Features.Clientes.GetCliente;
 using PlanTA.Ventas.Application.Features.Clientes.ListClientes;
 using PlanTA.Ventas.Application.Features.Clientes.UpdateCliente;
@@ -47,6 +48,14 @@ public sealed class ClientesEndpoints : IEndpointGroup
             return result.ToHttpResult();
         })
         .WithName("UpdateCliente")
+        .WithTags("Clientes");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteClienteCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteCliente")
         .WithTags("Clientes");
     }
 }

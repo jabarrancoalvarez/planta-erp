@@ -1,5 +1,6 @@
 using MediatR;
 using PlanTA.Inventario.Application.Features.Almacenes.CreateAlmacen;
+using PlanTA.Inventario.Application.Features.Almacenes.DeleteAlmacen;
 using PlanTA.Inventario.Application.Features.Almacenes.GetAlmacen;
 using PlanTA.Inventario.Application.Features.Almacenes.ListAlmacenes;
 using PlanTA.SharedKernel.Extensions;
@@ -34,6 +35,14 @@ public sealed class AlmacenesEndpoints : IEndpointGroup
             return result.ToHttpResult(201);
         })
         .WithName("CreateAlmacen")
+        .WithTags("Almacenes");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteAlmacenCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteAlmacen")
         .WithTags("Almacenes");
     }
 }

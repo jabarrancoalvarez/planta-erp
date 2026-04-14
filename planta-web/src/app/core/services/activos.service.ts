@@ -77,4 +77,8 @@ export class ActivosService {
   cambiarEstado(id: string, estado: EstadoActivo): Observable<string> {
     return this.api.put<string>(`/activos/${id}/estado`, { estado });
   }
+
+  deleteActivo(id: string): Observable<string> {
+    return this.api.delete<string>(`/activos/${id}`);
+  }
 }

@@ -101,6 +101,10 @@ export class InventarioService {
     return this.api.get('/inventario/almacenes');
   }
 
+  deleteAlmacen(id: string): Observable<string> {
+    return this.api.delete(`/inventario/almacenes/${id}`);
+  }
+
   listMovimientos(productoId?: string, almacenId?: string, page = 1, pageSize = 20): Observable<PagedResult<MovimientoStockDto>> {
     return this.api.get('/inventario/movimientos', { productoId, almacenId, page, pageSize });
   }
