@@ -81,6 +81,41 @@ export const routes: Routes = [
           import('./features/incidencias/incidencias.routes').then(m => m.INCIDENCIAS_ROUTES),
       },
       {
+        path: 'facturacion',
+        loadChildren: () =>
+          import('./features/facturacion/facturacion.routes').then(m => m.FACTURACION_ROUTES),
+      },
+      {
+        path: 'crm',
+        loadChildren: () =>
+          import('./features/crm/crm.routes').then(m => m.CRM_ROUTES),
+      },
+      {
+        path: 'rrhh',
+        loadChildren: () =>
+          import('./features/rrhh/rrhh.routes').then(m => m.RRHH_ROUTES),
+      },
+      {
+        path: 'costes',
+        loadChildren: () =>
+          import('./features/costes/costes.routes').then(m => m.COSTES_ROUTES),
+      },
+      {
+        path: 'oee',
+        loadChildren: () =>
+          import('./features/oee/oee.routes').then(m => m.OEE_ROUTES),
+      },
+      {
+        path: 'importador',
+        loadChildren: () =>
+          import('./features/importador/importador.routes').then(m => m.IMPORTADOR_ROUTES),
+      },
+      {
+        path: 'ia',
+        loadChildren: () =>
+          import('./features/ia/ia.routes').then(m => m.IA_ROUTES),
+      },
+      {
         path: 'movil',
         loadChildren: () =>
           import('./features/movil/movil.routes').then(m => m.MOVIL_ROUTES),
