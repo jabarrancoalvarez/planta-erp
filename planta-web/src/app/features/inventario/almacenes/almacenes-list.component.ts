@@ -1,5 +1,6 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { InventarioService, AlmacenListDto } from '../../../core/services/inventario.service';
 
 @Component({
@@ -39,7 +40,7 @@ import { InventarioService, AlmacenListDto } from '../../../core/services/invent
             </thead>
             <tbody>
               @for (item of filtered(); track item.id) {
-                <tr>
+                <tr style="cursor:pointer;" (click)="goToDetail(item.id)">
                   <td>{{ item.nombre }}</td>
                   <td>{{ item.direccion ?? '—' }}</td>
                   <td>{{ item.esPrincipal ? 'Si' : 'No' }}</td>
@@ -59,6 +60,7 @@ import { InventarioService, AlmacenListDto } from '../../../core/services/invent
 })
 export class AlmacenesListComponent implements OnInit {
   private svc = inject(InventarioService);
+  private router = inject(Router);
 
   readonly allItems = signal<AlmacenListDto[]>([]);
   readonly loading = signal(false);
@@ -88,5 +90,9 @@ export class AlmacenesListComponent implements OnInit {
 
   onSearch(event: Event): void {
     this.searchTerm.set((event.target as HTMLInputElement).value);
+  }
+
+  goToDetail(id: string): void {
+    this.router.navigate(['/app/inventario/almacenes', id]);
   }
 }

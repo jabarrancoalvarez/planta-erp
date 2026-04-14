@@ -38,6 +38,23 @@ export interface AlmacenListDto {
   totalUbicaciones: number;
 }
 
+export interface UbicacionDto {
+  id: string;
+  codigo: string;
+  nombre: string | null;
+  capacidadMaxima: number;
+  activa: boolean;
+}
+
+export interface AlmacenDetailDto {
+  id: string;
+  nombre: string;
+  direccion: string | null;
+  descripcion: string | null;
+  esPrincipal: boolean;
+  ubicaciones: UbicacionDto[];
+}
+
 export interface MovimientoStockDto {
   id: string;
   productoId: string;
@@ -99,6 +116,10 @@ export class InventarioService {
 
   listAlmacenes(): Observable<AlmacenListDto[]> {
     return this.api.get('/inventario/almacenes');
+  }
+
+  getAlmacen(id: string): Observable<AlmacenDetailDto> {
+    return this.api.get(`/inventario/almacenes/${id}`);
   }
 
   deleteAlmacen(id: string): Observable<string> {
