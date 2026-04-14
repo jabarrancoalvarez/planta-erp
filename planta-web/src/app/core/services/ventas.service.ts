@@ -118,6 +118,10 @@ export class VentasService {
     return this.api.put(`/ventas/pedidos/${id}/estado`, { estadoDestino, motivo });
   }
 
+  deletePedido(id: string): Observable<string> {
+    return this.api.delete(`/ventas/pedidos/${id}`);
+  }
+
   listExpediciones(pedidoId?: string, estado?: string, page = 1, pageSize = 20): Observable<PagedResult<ExpedicionListDto>> {
     return this.api.get('/ventas/expediciones', { pedidoId, estado, page, pageSize });
   }

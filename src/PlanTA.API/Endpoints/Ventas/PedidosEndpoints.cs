@@ -2,6 +2,7 @@ using MediatR;
 using PlanTA.Ventas.Application.Features.Pedidos.AddLineaPedido;
 using PlanTA.Ventas.Application.Features.Pedidos.CambiarEstadoPedido;
 using PlanTA.Ventas.Application.Features.Pedidos.CreatePedido;
+using PlanTA.Ventas.Application.Features.Pedidos.DeletePedido;
 using PlanTA.Ventas.Application.Features.Pedidos.GetPedido;
 using PlanTA.Ventas.Application.Features.Pedidos.ListPedidos;
 using PlanTA.Ventas.Domain.Enums;
@@ -54,6 +55,14 @@ public sealed class PedidosEndpoints : IEndpointGroup
             return result.ToHttpResult();
         })
         .WithName("CambiarEstadoPedido")
+        .WithTags("Pedidos");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeletePedidoCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeletePedido")
         .WithTags("Pedidos");
     }
 }

@@ -14,6 +14,9 @@ import { NotificationService } from '../../../shared/components/toast/notificati
       <div class="detail-page__header">
         <button class="detail-page__back" (click)="goBack()">&larr; Volver</button>
         <h1 class="detail-page__title">Pedido de Venta</h1>
+        @if (item()) {
+          <button class="detail-page__back" style="margin-left:auto;background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
+        }
       </div>
 
       @if (loading()) {
@@ -160,6 +163,16 @@ export class PedidoDetailComponent implements OnInit {
     this.svc.cambiarEstadoPedido(this.id, estadoDestino).subscribe({
       next: () => { this.notify.success(`Estado cambiado a ${estadoDestino}`); this.loadDetail(); },
       error: (err) => this.notify.error(err?.error?.message ?? 'Error al cambiar estado'),
+    });
+  }
+
+  onDelete(): void {
+    const ped = this.item();
+    if (!ped) return;
+    if (!confirm(`¿Eliminar pedido "${ped.codigo}"?`)) return;
+    this.svc.deletePedido(this.id).subscribe({
+      next: () => this.router.navigate(['/app/ventas/pedidos']),
+      error: (err) => this.notify.error(err?.error?.message ?? 'Error al eliminar'),
     });
   }
 
