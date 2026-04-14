@@ -72,6 +72,10 @@ export class MantenimientoService {
     return this.api.post<string>(`/mantenimiento/ordenes-trabajo/${id}/completar`, req);
   }
 
+  deleteOrden(id: string): Observable<string> {
+    return this.api.delete<string>(`/mantenimiento/ordenes-trabajo/${id}`);
+  }
+
   createPlan(req: CreatePlanRequest): Observable<string> {
     return this.api.post<string>('/mantenimiento/planes', req);
   }

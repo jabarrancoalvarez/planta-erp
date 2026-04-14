@@ -27,6 +27,7 @@ import { MantenimientoService, OrdenTrabajoListDto } from '../../core/services/m
                 <th>Estado</th>
                 <th>Prioridad</th>
                 <th>Planificada</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -38,9 +39,12 @@ import { MantenimientoService, OrdenTrabajoListDto } from '../../core/services/m
                   <td>{{ ot.estado }}</td>
                   <td>{{ ot.prioridad }}</td>
                   <td>{{ ot.fechaPlanificada | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="onDelete(ot)">Eliminar</button>
+                  </td>
                 </tr>
               } @empty {
-                <tr><td colspan="6" class="empty-state">Sin órdenes de trabajo</td></tr>
+                <tr><td colspan="7" class="empty-state">Sin órdenes de trabajo</td></tr>
               }
             </tbody>
           </table>
@@ -55,9 +59,22 @@ export class OrdenesListComponent implements OnInit {
   readonly loading = signal(true);
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  private load(): void {
+    this.loading.set(true);
     this.svc.listOrdenes({ pageSize: 50 }).subscribe({
       next: (res) => { this.items.set(res.items); this.loading.set(false); },
       error: () => this.loading.set(false),
+    });
+  }
+
+  onDelete(ot: OrdenTrabajoListDto): void {
+    if (!confirm(`¿Eliminar la orden ${ot.codigo}?`)) return;
+    this.svc.deleteOrden(ot.id).subscribe({
+      next: () => this.load(),
+      error: () => alert('Error al eliminar la orden'),
     });
   }
 }

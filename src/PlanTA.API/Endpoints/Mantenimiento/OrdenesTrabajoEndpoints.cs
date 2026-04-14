@@ -1,6 +1,7 @@
 using MediatR;
 using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.CompletarOT;
 using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.CreateOrdenTrabajo;
+using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.DeleteOT;
 using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.ListOrdenesTrabajo;
 using PlanTA.Mantenimiento.Application.Features.Planes.CreatePlan;
 using PlanTA.Mantenimiento.Domain.Enums;
@@ -32,6 +33,12 @@ public sealed class OrdenesTrabajoEndpoints : IEndpointGroup
             var result = await m.Send(new CompletarOTCommand(id, req.HorasReales, req.CosteManoObra, req.NotasCierre), ct);
             return result.ToHttpResult();
         }).WithName("CompletarOrdenTrabajo").WithTags("Mantenimiento");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteOTCommand(id), ct);
+            return result.ToHttpResult();
+        }).WithName("DeleteOrdenTrabajo").WithTags("Mantenimiento");
     }
 }
 
