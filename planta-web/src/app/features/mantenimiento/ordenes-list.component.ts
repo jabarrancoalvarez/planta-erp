@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MantenimientoService, OrdenTrabajoListDto } from '../../core/services/mantenimiento.service';
 
 @Component({
@@ -32,7 +33,7 @@ import { MantenimientoService, OrdenTrabajoListDto } from '../../core/services/m
             </thead>
             <tbody>
               @for (ot of items(); track ot.id) {
-                <tr>
+                <tr class="clickable-row" (click)="goDetail(ot)">
                   <td><code>{{ ot.codigo }}</code></td>
                   <td>{{ ot.titulo }}</td>
                   <td>{{ ot.tipo }}</td>
@@ -40,7 +41,7 @@ import { MantenimientoService, OrdenTrabajoListDto } from '../../core/services/m
                   <td>{{ ot.prioridad }}</td>
                   <td>{{ ot.fechaPlanificada | date:'dd/MM/yyyy' }}</td>
                   <td>
-                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="onDelete(ot)">Eliminar</button>
+                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="onDelete(ot, $event)">Eliminar</button>
                   </td>
                 </tr>
               } @empty {
@@ -55,8 +56,13 @@ import { MantenimientoService, OrdenTrabajoListDto } from '../../core/services/m
 })
 export class OrdenesListComponent implements OnInit {
   private svc = inject(MantenimientoService);
+  private router = inject(Router);
   readonly items = signal<OrdenTrabajoListDto[]>([]);
   readonly loading = signal(true);
+
+  goDetail(ot: OrdenTrabajoListDto): void {
+    this.router.navigate(['/app/mantenimiento/ordenes', ot.id]);
+  }
 
   ngOnInit(): void {
     this.load();
@@ -70,7 +76,8 @@ export class OrdenesListComponent implements OnInit {
     });
   }
 
-  onDelete(ot: OrdenTrabajoListDto): void {
+  onDelete(ot: OrdenTrabajoListDto, event: Event): void {
+    event.stopPropagation();
     if (!confirm(`¿Eliminar la orden ${ot.codigo}?`)) return;
     this.svc.deleteOrden(ot.id).subscribe({
       next: () => this.load(),

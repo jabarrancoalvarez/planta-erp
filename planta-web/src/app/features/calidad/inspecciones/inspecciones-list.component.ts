@@ -29,6 +29,7 @@ import { CalidadService, InspeccionListDto } from '../../../core/services/calida
                 <th>Fecha</th>
                 <th>Origen</th>
                 <th>Resultado</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -44,9 +45,12 @@ import { CalidadService, InspeccionListDto } from '../../../core/services/calida
                       {{ item.resultadoInspeccion ?? 'Pendiente' }}
                     </span>
                   </td>
+                  <td>
+                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="onDelete(item)">Eliminar</button>
+                  </td>
                 </tr>
               } @empty {
-                <tr><td colspan="3" class="empty-state">No se encontraron resultados</td></tr>
+                <tr><td colspan="4" class="empty-state">No se encontraron resultados</td></tr>
               }
             </tbody>
           </table>
@@ -66,6 +70,10 @@ export class InspeccionesListComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  private load(): void {
     this.loading.set(true);
     this.svc.listInspecciones().subscribe({
       next: (res) => {
@@ -77,6 +85,14 @@ export class InspeccionesListComponent implements OnInit {
         this.error.set(err?.error?.message ?? 'Error al cargar inspecciones');
         this.loading.set(false);
       },
+    });
+  }
+
+  onDelete(inspeccion: InspeccionListDto): void {
+    if (!confirm(`¿Eliminar la inspección ${inspeccion.fechaInspeccion}?`)) return;
+    this.svc.deleteInspeccion(inspeccion.id).subscribe({
+      next: () => this.load(),
+      error: () => alert('Error al eliminar la inspección'),
     });
   }
 }

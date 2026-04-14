@@ -1,6 +1,7 @@
 using MediatR;
 using PlanTA.Calidad.Application.Features.Inspecciones.CompletarInspeccion;
 using PlanTA.Calidad.Application.Features.Inspecciones.CreateInspeccion;
+using PlanTA.Calidad.Application.Features.Inspecciones.DeleteInspeccion;
 using PlanTA.Calidad.Application.Features.Inspecciones.GetInspeccion;
 using PlanTA.Calidad.Application.Features.Inspecciones.ListInspecciones;
 using PlanTA.Calidad.Application.Features.Inspecciones.RegistrarResultado;
@@ -54,6 +55,14 @@ public sealed class InspeccionesEndpoints : IEndpointGroup
             return result.ToHttpResult();
         })
         .WithName("CompletarInspeccion")
+        .WithTags("Inspecciones");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteInspeccionCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteInspeccion")
         .WithTags("Inspecciones");
     }
 }

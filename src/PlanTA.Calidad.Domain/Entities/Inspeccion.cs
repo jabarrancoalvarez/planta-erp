@@ -5,7 +5,7 @@ using PlanTA.SharedKernel;
 
 namespace PlanTA.Calidad.Domain.Entities;
 
-public class Inspeccion : AggregateRoot<InspeccionId>
+public class Inspeccion : SoftDeletableEntity<InspeccionId>
 {
     private readonly List<ResultadoCriterio> _resultados = [];
     private Inspeccion() { }

@@ -2,6 +2,7 @@ using MediatR;
 using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.CompletarOT;
 using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.CreateOrdenTrabajo;
 using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.DeleteOT;
+using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.GetOrdenTrabajo;
 using PlanTA.Mantenimiento.Application.Features.OrdenesTrabajo.ListOrdenesTrabajo;
 using PlanTA.Mantenimiento.Application.Features.Planes.CreatePlan;
 using PlanTA.Mantenimiento.Domain.Enums;
@@ -21,6 +22,12 @@ public sealed class OrdenesTrabajoEndpoints : IEndpointGroup
             var result = await m.Send(new ListOrdenesTrabajoQuery(estado, tipo, activoId, page ?? 1, pageSize ?? 20), ct);
             return result.ToHttpResult();
         }).WithName("ListOrdenesTrabajo").WithTags("Mantenimiento");
+
+        group.MapGet("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new GetOrdenTrabajoQuery(id), ct);
+            return result.ToHttpResult();
+        }).WithName("GetOrdenTrabajo").WithTags("Mantenimiento");
 
         group.MapPost("/", async (CreateOrdenTrabajoCommand cmd, IMediator m, CancellationToken ct) =>
         {

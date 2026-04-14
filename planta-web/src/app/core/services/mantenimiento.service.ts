@@ -19,6 +19,26 @@ export interface OrdenTrabajoListDto {
   fechaPlanificada: string | null;
 }
 
+export interface OrdenTrabajoDetailDto {
+  id: string;
+  codigo: string;
+  titulo: string;
+  descripcion: string | null;
+  tipo: TipoMantenimiento;
+  estado: EstadoOT;
+  prioridad: PrioridadOT;
+  activoId: string;
+  asignadoAUserId: string | null;
+  fechaPlanificada: string | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  horasEstimadas: number;
+  horasReales: number;
+  costeManoObra: number;
+  costeRepuestos: number;
+  notasCierre: string | null;
+}
+
 export interface CreateOrdenTrabajoRequest {
   codigo: string;
   titulo: string;
@@ -70,6 +90,10 @@ export class MantenimientoService {
 
   completarOrden(id: string, req: CompletarOTRequest): Observable<string> {
     return this.api.post<string>(`/mantenimiento/ordenes-trabajo/${id}/completar`, req);
+  }
+
+  getOrden(id: string): Observable<OrdenTrabajoDetailDto> {
+    return this.api.get<OrdenTrabajoDetailDto>(`/mantenimiento/ordenes-trabajo/${id}`);
   }
 
   deleteOrden(id: string): Observable<string> {

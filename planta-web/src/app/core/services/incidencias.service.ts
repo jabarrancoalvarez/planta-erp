@@ -32,6 +32,26 @@ export interface CreateIncidenciaRequest {
   fotosUrl?: string[];
 }
 
+export interface IncidenciaDetailDto {
+  id: string;
+  codigo: string;
+  titulo: string;
+  descripcion: string;
+  tipo: TipoIncidencia;
+  severidad: SeveridadIncidencia;
+  estado: EstadoIncidencia;
+  activoId: string | null;
+  ubicacionTexto: string | null;
+  reportadoPorUserId: string;
+  asignadoAUserId: string | null;
+  fechaApertura: string;
+  fechaCierre: string | null;
+  ordenTrabajoId: string | null;
+  causaRaiz: string | null;
+  resolucionNotas: string | null;
+  paradaLinea: boolean;
+}
+
 export interface CerrarIncidenciaRequest {
   causaRaiz?: string;
   resolucionNotas?: string;
@@ -58,6 +78,10 @@ export class IncidenciasService {
 
   cerrarIncidencia(id: string, req: CerrarIncidenciaRequest): Observable<string> {
     return this.api.post<string>(`/incidencias/${id}/cerrar`, req);
+  }
+
+  getIncidencia(id: string): Observable<IncidenciaDetailDto> {
+    return this.api.get<IncidenciaDetailDto>(`/incidencias/${id}`);
   }
 
   deleteIncidencia(id: string): Observable<string> {

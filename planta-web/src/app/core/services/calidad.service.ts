@@ -130,4 +130,8 @@ export class CalidadService {
   deleteNC(id: string): Observable<string> {
     return this.api.delete(`/calidad/no-conformidades/${id}`);
   }
+
+  deleteInspeccion(id: string): Observable<string> {
+    return this.api.delete(`/calidad/inspecciones/${id}`);
+  }
 }

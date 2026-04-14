@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { IncidenciasService, IncidenciaListDto } from '../../core/services/incidencias.service';
 
 @Component({
@@ -33,7 +34,7 @@ import { IncidenciasService, IncidenciaListDto } from '../../core/services/incid
             </thead>
             <tbody>
               @for (inc of items(); track inc.id) {
-                <tr>
+                <tr class="clickable-row" (click)="goDetail(inc)">
                   <td><code>{{ inc.codigo }}</code></td>
                   <td>{{ inc.titulo }}</td>
                   <td>{{ inc.tipo }}</td>
@@ -42,7 +43,7 @@ import { IncidenciasService, IncidenciaListDto } from '../../core/services/incid
                   <td>{{ inc.fechaApertura | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>{{ inc.paradaLinea ? 'Sí' : '-' }}</td>
                   <td>
-                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="onDelete(inc)">Eliminar</button>
+                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="onDelete(inc, $event)">Eliminar</button>
                   </td>
                 </tr>
               } @empty {
@@ -57,8 +58,13 @@ import { IncidenciasService, IncidenciaListDto } from '../../core/services/incid
 })
 export class IncidenciasListComponent implements OnInit {
   private svc = inject(IncidenciasService);
+  private router = inject(Router);
   readonly items = signal<IncidenciaListDto[]>([]);
   readonly loading = signal(true);
+
+  goDetail(inc: IncidenciaListDto): void {
+    this.router.navigate(['/app/incidencias', inc.id]);
+  }
 
   ngOnInit(): void {
     this.load();
@@ -72,7 +78,8 @@ export class IncidenciasListComponent implements OnInit {
     });
   }
 
-  onDelete(inc: IncidenciaListDto): void {
+  onDelete(inc: IncidenciaListDto, event: Event): void {
+    event.stopPropagation();
     if (!confirm(`¿Eliminar la incidencia ${inc.codigo}?`)) return;
     this.svc.deleteIncidencia(inc.id).subscribe({
       next: () => this.load(),
