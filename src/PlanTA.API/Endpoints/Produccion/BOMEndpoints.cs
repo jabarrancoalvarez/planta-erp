@@ -1,6 +1,7 @@
 using MediatR;
 using PlanTA.Produccion.Application.Features.BOM.AddLineaBOM;
 using PlanTA.Produccion.Application.Features.BOM.CreateBOM;
+using PlanTA.Produccion.Application.Features.BOM.DeleteBOM;
 using PlanTA.Produccion.Application.Features.BOM.GetBOM;
 using PlanTA.Produccion.Application.Features.BOM.ListBOMs;
 using PlanTA.SharedKernel.Extensions;
@@ -44,6 +45,14 @@ public sealed class BOMEndpoints : IEndpointGroup
             return result.ToHttpResult(201);
         })
         .WithName("AddLineaBOM")
+        .WithTags("BOM");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteBOMCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteBOM")
         .WithTags("BOM");
     }
 }

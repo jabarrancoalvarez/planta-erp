@@ -13,6 +13,9 @@ import { ProduccionService, BOMDetailDto } from '../../../core/services/producci
       <div class="detail-page__header">
         <button class="detail-page__back" (click)="goBack()">&larr; Volver</button>
         <h1 class="detail-page__title">Detalle de BOM</h1>
+        @if (item()) {
+          <button class="detail-page__back" style="margin-left:auto;background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
+        }
       </div>
 
       @if (loading()) {
@@ -100,4 +103,14 @@ export class BOMDetailComponent implements OnInit {
   }
 
   goBack(): void { this.router.navigate(['/app/produccion/bom']); }
+
+  onDelete(): void {
+    const bom = this.item();
+    if (!bom) return;
+    if (!confirm(`¿Eliminar BOM "${bom.nombre}"?`)) return;
+    this.svc.deleteBOM(bom.id).subscribe({
+      next: () => this.router.navigate(['/app/produccion/bom']),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 }

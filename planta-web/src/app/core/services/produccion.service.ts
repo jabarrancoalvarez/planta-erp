@@ -84,6 +84,10 @@ export class ProduccionService {
     return this.api.post('/produccion/bom', data);
   }
 
+  deleteBOM(id: string): Observable<string> {
+    return this.api.delete(`/produccion/bom/${id}`);
+  }
+
   listRutas(search?: string, page = 1, pageSize = 20): Observable<PagedResult<RutaListDto>> {
     return this.api.get('/produccion/rutas', { search, page, pageSize });
   }
