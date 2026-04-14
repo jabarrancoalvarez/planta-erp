@@ -47,4 +47,8 @@ export class OeeService {
   registrar(req: RegistrarOEERequest): Observable<string> {
     return this.api.post<string>('/oee/registros', req);
   }
+
+  deleteRegistro(id: string): Observable<unknown> {
+    return this.api.delete(`/oee/registros/${id}`);
+  }
 }

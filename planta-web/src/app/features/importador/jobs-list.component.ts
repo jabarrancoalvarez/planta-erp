@@ -60,6 +60,7 @@ import { AuthService } from '../../core/services/auth.service';
                 <th>Total/Validas/Error/Import.</th>
                 <th>Iniciado</th>
                 <th>Finalizado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -72,9 +73,12 @@ import { AuthService } from '../../core/services/auth.service';
                   <td>{{ j.filasTotales }}/{{ j.filasValidas }}/{{ j.filasConError }}/{{ j.filasImportadas }}</td>
                   <td>{{ j.iniciadoEn ? (j.iniciadoEn | date:'dd/MM HH:mm') : '---' }}</td>
                   <td>{{ j.finalizadoEn ? (j.finalizadoEn | date:'dd/MM HH:mm') : '---' }}</td>
+                  <td>
+                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(j)">Eliminar</button>
+                  </td>
                 </tr>
               } @empty {
-                <tr><td colspan="7" class="empty-state">Sin jobs</td></tr>
+                <tr><td colspan="8" class="empty-state">Sin jobs</td></tr>
               }
             </tbody>
           </table>
@@ -139,6 +143,14 @@ export class ImportJobsListComponent implements OnInit {
         this.createError.set(err?.error?.message ?? 'Error al crear');
         this.saving.set(false);
       },
+    });
+  }
+
+  remove(j: ImportJobDto): void {
+    if (!confirm(`¿Eliminar job "${j.nombreArchivo}"?`)) return;
+    this.svc.deleteJob(j.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
     });
   }
 }

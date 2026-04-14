@@ -95,6 +95,7 @@ import { VentasService } from '../../core/services/ventas.service';
                   <td>
                     @if (f.estado === 'Borrador') {
                       <button class="btn-sm" (click)="emitir(f)">Emitir</button>
+                      <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(f)">Eliminar</button>
                     }
                     @if (f.estado === 'Emitida' || f.estado === 'Firmada') {
                       <button class="btn-sm" (click)="verifactu(f)">Verifactu</button>
@@ -194,5 +195,13 @@ export class FacturasListComponent implements OnInit {
 
   verifactu(f: FacturaListDto): void {
     this.svc.enviarVerifactu(f.id).subscribe({ next: () => this.load(), error: (e) => this.error.set(e?.error?.message ?? 'Error verifactu') });
+  }
+
+  remove(f: FacturaListDto): void {
+    if (!confirm(`¿Eliminar factura ${f.numeroCompleto}?`)) return;
+    this.svc.deleteFactura(f.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
   }
 }

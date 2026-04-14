@@ -79,6 +79,7 @@ import { ActivosService, ActivoListDto } from '../../core/services/activos.servi
                 <th style="text-align:right">Rend %</th>
                 <th style="text-align:right">Calidad %</th>
                 <th style="text-align:right">OEE %</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -93,9 +94,12 @@ import { ActivosService, ActivoListDto } from '../../core/services/activos.servi
                   <td style="text-align:right">{{ r.rendimiento | number:'1.1-1' }}</td>
                   <td style="text-align:right">{{ r.calidad | number:'1.1-1' }}</td>
                   <td style="text-align:right"><strong>{{ r.oee | number:'1.1-1' }}</strong></td>
+                  <td>
+                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(r)">Eliminar</button>
+                  </td>
                 </tr>
               } @empty {
-                <tr><td colspan="9" class="empty-state">Sin registros</td></tr>
+                <tr><td colspan="10" class="empty-state">Sin registros</td></tr>
               }
             </tbody>
           </table>
@@ -170,6 +174,14 @@ export class OeeListComponent implements OnInit {
         this.createError.set(err?.error?.message ?? 'Error al registrar');
         this.saving.set(false);
       },
+    });
+  }
+
+  remove(r: RegistroOEEDto): void {
+    if (!confirm(`¿Eliminar registro OEE del ${new Date(r.fecha).toLocaleDateString()}?`)) return;
+    this.svc.deleteRegistro(r.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
     });
   }
 }

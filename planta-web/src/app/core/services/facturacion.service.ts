@@ -106,4 +106,8 @@ export class FacturacionService {
   enviarVerifactu(id: string): Observable<unknown> {
     return this.api.post<unknown>(`/facturacion/facturas/${id}/verifactu`, {});
   }
+
+  deleteFactura(id: string): Observable<unknown> {
+    return this.api.delete(`/facturacion/facturas/${id}`);
+  }
 }

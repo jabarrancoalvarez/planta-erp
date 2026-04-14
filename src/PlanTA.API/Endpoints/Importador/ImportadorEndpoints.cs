@@ -1,5 +1,6 @@
 using MediatR;
 using PlanTA.Importador.Application.Features.Jobs.CreateJob;
+using PlanTA.Importador.Application.Features.Jobs.DeleteJob;
 using PlanTA.Importador.Application.Features.Jobs.ListJobs;
 using PlanTA.SharedKernel.Extensions;
 
@@ -22,5 +23,9 @@ public sealed class ImportadorEndpoints : IEndpointGroup
             var result = await m.Send(cmd, ct);
             return result.ToHttpResult(201);
         }).WithName("CreateImportJob").WithTags("Importador");
+
+        group.MapDelete("/jobs/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+            (await m.Send(new DeleteImportJobCommand(id), ct)).ToHttpResult())
+            .WithName("DeleteImportJob").WithTags("Importador");
     }
 }

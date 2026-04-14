@@ -1,4 +1,5 @@
 using MediatR;
+using PlanTA.OEE.Application.Features.Registros.DeleteRegistroOEE;
 using PlanTA.OEE.Application.Features.Registros.ListRegistros;
 using PlanTA.OEE.Application.Features.Registros.RegistrarOEE;
 using PlanTA.OEE.Application.Features.Registros.ResumenActivo;
@@ -26,5 +27,9 @@ public sealed class OEEEndpoints : IEndpointGroup
             DateTimeOffset? hasta, IMediator m, CancellationToken ct) =>
             (await m.Send(new ResumenActivoQuery(activoId, desde, hasta), ct)).ToHttpResult())
             .WithName("ResumenOEEActivo").WithTags("OEE");
+
+        group.MapDelete("/registros/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+            (await m.Send(new DeleteRegistroOEECommand(id), ct)).ToHttpResult())
+            .WithName("DeleteRegistroOEE").WithTags("OEE");
     }
 }

@@ -40,4 +40,8 @@ export class ImportadorService {
   createJob(req: CreateImportJobRequest): Observable<string> {
     return this.api.post<string>('/importador/jobs', req);
   }
+
+  deleteJob(id: string): Observable<unknown> {
+    return this.api.delete(`/importador/jobs/${id}`);
+  }
 }

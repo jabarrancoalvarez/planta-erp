@@ -1,5 +1,6 @@
 using MediatR;
 using PlanTA.Facturacion.Application.Features.Facturas.CreateFactura;
+using PlanTA.Facturacion.Application.Features.Facturas.DeleteFactura;
 using PlanTA.Facturacion.Application.Features.Facturas.EmitirFactura;
 using PlanTA.Facturacion.Application.Features.Facturas.EnviarVerifactu;
 using PlanTA.Facturacion.Application.Features.Facturas.GetFactura;
@@ -36,5 +37,9 @@ public sealed class FacturacionEndpoints : IEndpointGroup
         group.MapPost("/facturas/{id:guid}/verifactu", async (Guid id, IMediator m, CancellationToken ct) =>
             (await m.Send(new EnviarVerifactuCommand(id), ct)).ToHttpResult())
             .WithName("EnviarVerifactu").WithTags("Facturacion");
+
+        group.MapDelete("/facturas/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+            (await m.Send(new DeleteFacturaCommand(id), ct)).ToHttpResult())
+            .WithName("DeleteFactura").WithTags("Facturacion");
     }
 }
