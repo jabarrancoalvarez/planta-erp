@@ -48,6 +48,13 @@ public class RutaProduccion : SoftDeletableEntity<RutaProduccionId>
         return operacion;
     }
 
+    public void Actualizar(string nombre, string? descripcion)
+    {
+        Nombre = nombre.Trim();
+        Descripcion = descripcion;
+        MarkUpdated();
+    }
+
     public void Desactivar()
     {
         Activa = false;

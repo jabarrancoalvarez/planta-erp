@@ -123,6 +123,10 @@ export class CalidadService {
     return this.api.put(`/calidad/no-conformidades/${id}/estado`, { estadoDestino, causaRaiz });
   }
 
+  updatePlantilla(id: string, data: { nombre: string; descripcion?: string }): Observable<string> {
+    return this.api.put(`/calidad/plantillas/${id}`, data);
+  }
+
   deletePlantilla(id: string): Observable<string> {
     return this.api.delete(`/calidad/plantillas/${id}`);
   }

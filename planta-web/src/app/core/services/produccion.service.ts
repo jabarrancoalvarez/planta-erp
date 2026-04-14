@@ -104,6 +104,10 @@ export class ProduccionService {
     return this.api.post('/produccion/bom', data);
   }
 
+  updateBOM(id: string, data: { nombre: string; descripcion?: string }): Observable<string> {
+    return this.api.put(`/produccion/bom/${id}`, data);
+  }
+
   deleteBOM(id: string): Observable<string> {
     return this.api.delete(`/produccion/bom/${id}`);
   }
@@ -114,6 +118,10 @@ export class ProduccionService {
 
   getRuta(id: string): Observable<RutaDetailDto> {
     return this.api.get(`/produccion/rutas/${id}`);
+  }
+
+  updateRuta(id: string, data: { nombre: string; descripcion?: string }): Observable<string> {
+    return this.api.put(`/produccion/rutas/${id}`, data);
   }
 
   deleteRuta(id: string): Observable<string> {

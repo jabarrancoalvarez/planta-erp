@@ -63,6 +63,13 @@ public class PlantillaInspeccion : SoftDeletableEntity<PlantillaInspeccionId>
         return Result<bool>.Success(true);
     }
 
+    public void Actualizar(string nombre, string? descripcion)
+    {
+        Nombre = nombre.Trim();
+        Descripcion = descripcion;
+        MarkUpdated();
+    }
+
     public void Desactivar()
     {
         Activa = false;

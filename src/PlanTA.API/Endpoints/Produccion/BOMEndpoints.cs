@@ -4,6 +4,7 @@ using PlanTA.Produccion.Application.Features.BOM.CreateBOM;
 using PlanTA.Produccion.Application.Features.BOM.DeleteBOM;
 using PlanTA.Produccion.Application.Features.BOM.GetBOM;
 using PlanTA.Produccion.Application.Features.BOM.ListBOMs;
+using PlanTA.Produccion.Application.Features.BOM.UpdateBOM;
 using PlanTA.SharedKernel.Extensions;
 
 namespace PlanTA.API.Endpoints.Produccion;
@@ -47,6 +48,14 @@ public sealed class BOMEndpoints : IEndpointGroup
         .WithName("AddLineaBOM")
         .WithTags("BOM");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdateBOMRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdateBOMCommand(id, req.Nombre, req.Descripcion), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("UpdateBOM")
+        .WithTags("BOM");
+
         group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new DeleteBOMCommand(id), ct);
@@ -56,6 +65,8 @@ public sealed class BOMEndpoints : IEndpointGroup
         .WithTags("BOM");
     }
 }
+
+public record UpdateBOMRequest(string Nombre, string? Descripcion);
 
 public record AddLineaBOMRequest(
     Guid ComponenteProductoId,

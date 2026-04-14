@@ -4,6 +4,7 @@ using PlanTA.Activos.Application.Features.Activos.CreateActivo;
 using PlanTA.Activos.Application.Features.Activos.DeleteActivo;
 using PlanTA.Activos.Application.Features.Activos.GetActivo;
 using PlanTA.Activos.Application.Features.Activos.ListActivos;
+using PlanTA.Activos.Application.Features.Activos.UpdateActivo;
 using PlanTA.Activos.Domain.Enums;
 using PlanTA.SharedKernel.Extensions;
 
@@ -34,6 +35,13 @@ public sealed class ActivosEndpoints : IEndpointGroup
             return result.ToHttpResult(201);
         }).WithName("CreateActivo").WithTags("Activos");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdateActivoRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdateActivoCommand(id, req.Nombre, req.Criticidad,
+                req.Descripcion, req.Ubicacion, req.Fabricante, req.Modelo), ct);
+            return result.ToHttpResult();
+        }).WithName("UpdateActivo").WithTags("Activos");
+
         group.MapPut("/{id:guid}/estado", async (Guid id, CambiarEstadoRequest req, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new CambiarEstadoActivoCommand(id, req.Estado), ct);
@@ -49,3 +57,11 @@ public sealed class ActivosEndpoints : IEndpointGroup
 }
 
 public record CambiarEstadoRequest(EstadoActivo Estado);
+
+public record UpdateActivoRequest(
+    string Nombre,
+    CriticidadActivo Criticidad,
+    string? Descripcion = null,
+    string? Ubicacion = null,
+    string? Fabricante = null,
+    string? Modelo = null);

@@ -4,6 +4,7 @@ using PlanTA.Calidad.Application.Features.Plantillas.CreatePlantilla;
 using PlanTA.Calidad.Application.Features.Plantillas.DeletePlantilla;
 using PlanTA.Calidad.Application.Features.Plantillas.GetPlantilla;
 using PlanTA.Calidad.Application.Features.Plantillas.ListPlantillas;
+using PlanTA.Calidad.Application.Features.Plantillas.UpdatePlantilla;
 using PlanTA.SharedKernel.Extensions;
 
 namespace PlanTA.API.Endpoints.Calidad;
@@ -48,6 +49,14 @@ public sealed class PlantillasEndpoints : IEndpointGroup
         .WithName("AddCriterio")
         .WithTags("Plantillas");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdatePlantillaRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdatePlantillaCommand(id, req.Nombre, req.Descripcion), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("UpdatePlantilla")
+        .WithTags("Plantillas");
+
         group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new DeletePlantillaCommand(id), ct);
@@ -57,6 +66,8 @@ public sealed class PlantillasEndpoints : IEndpointGroup
         .WithTags("Plantillas");
     }
 }
+
+public record UpdatePlantillaRequest(string Nombre, string? Descripcion);
 
 public record AddCriterioRequest(
     string Nombre,

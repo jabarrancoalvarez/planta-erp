@@ -2,7 +2,7 @@ import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActivosService, ActivoDto, EstadoActivo } from '../../core/services/activos.service';
+import { ActivosService, ActivoDto, EstadoActivo, CriticidadActivo } from '../../core/services/activos.service';
 
 @Component({
   selector: 'app-activo-detail',
@@ -16,6 +16,9 @@ import { ActivosService, ActivoDto, EstadoActivo } from '../../core/services/act
         <h1 class="detail-page__title">Detalle de Activo</h1>
         @if (item()) {
           <div style="margin-left:auto; display:flex; gap:0.5rem;">
+            @if (!editing()) {
+              <button class="detail-page__back" (click)="startEdit()">Editar</button>
+            }
             <button class="detail-page__back" (click)="startChangeEstado()">Cambiar Estado</button>
             <button class="detail-page__back" style="background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
           </div>
@@ -27,6 +30,50 @@ import { ActivosService, ActivoDto, EstadoActivo } from '../../core/services/act
       } @else if (error()) {
         <div class="error-state">{{ error() }}</div>
       } @else if (item(); as a) {
+        @if (editing()) {
+          <div class="detail-page__section">
+            <h2 class="detail-page__section-title">Editar Activo</h2>
+            <div class="detail-page__grid">
+              <div class="detail-page__field">
+                <label class="detail-page__field-label" for="ed-nombre">Nombre *</label>
+                <input id="ed-nombre" [(ngModel)]="edNombre" />
+              </div>
+              <div class="detail-page__field">
+                <label class="detail-page__field-label" for="ed-crit">Criticidad</label>
+                <select id="ed-crit" [(ngModel)]="edCriticidad">
+                  <option value="Baja">Baja</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Critica">Crítica</option>
+                </select>
+              </div>
+              <div class="detail-page__field">
+                <label class="detail-page__field-label" for="ed-desc">Descripción</label>
+                <input id="ed-desc" [(ngModel)]="edDescripcion" />
+              </div>
+              <div class="detail-page__field">
+                <label class="detail-page__field-label" for="ed-ubi">Ubicación</label>
+                <input id="ed-ubi" [(ngModel)]="edUbicacion" />
+              </div>
+              <div class="detail-page__field">
+                <label class="detail-page__field-label" for="ed-fab">Fabricante</label>
+                <input id="ed-fab" [(ngModel)]="edFabricante" />
+              </div>
+              <div class="detail-page__field">
+                <label class="detail-page__field-label" for="ed-mod">Modelo</label>
+                <input id="ed-mod" [(ngModel)]="edModelo" />
+              </div>
+            </div>
+            @if (saveError()) { <div class="error-state">{{ saveError() }}</div> }
+            <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+              <button class="detail-page__back" (click)="saveEdit()" [disabled]="saving()">
+                {{ saving() ? 'Guardando...' : 'Guardar' }}
+              </button>
+              <button class="detail-page__back" (click)="cancelEdit()">Cancelar</button>
+            </div>
+          </div>
+        }
+
         @if (changingEstado()) {
           <div class="detail-page__section">
             <h2 class="detail-page__section-title">Cambiar Estado</h2>
@@ -134,10 +181,17 @@ export class ActivoDetailComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly changingEstado = signal(false);
+  readonly editing = signal(false);
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
 
   edEstado: EstadoActivo = 'Operativo';
+  edNombre = '';
+  edCriticidad: CriticidadActivo = 'Media';
+  edDescripcion = '';
+  edUbicacion = '';
+  edFabricante = '';
+  edModelo = '';
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -149,6 +203,49 @@ export class ActivoDetailComponent implements OnInit {
     this.svc.getActivo(id).subscribe({
       next: (data) => { this.item.set(data); this.loading.set(false); },
       error: (err) => { this.error.set(err?.error?.message ?? 'Error al cargar activo'); this.loading.set(false); },
+    });
+  }
+
+  startEdit(): void {
+    const a = this.item();
+    if (!a) return;
+    this.edNombre = a.nombre;
+    this.edCriticidad = a.criticidad;
+    this.edDescripcion = a.descripcion ?? '';
+    this.edUbicacion = a.ubicacion ?? '';
+    this.edFabricante = a.fabricante ?? '';
+    this.edModelo = a.modelo ?? '';
+    this.saveError.set(null);
+    this.editing.set(true);
+  }
+
+  cancelEdit(): void {
+    this.editing.set(false);
+    this.saveError.set(null);
+  }
+
+  saveEdit(): void {
+    const a = this.item();
+    if (!a) return;
+    this.saving.set(true);
+    this.saveError.set(null);
+    this.svc.updateActivo(a.id, {
+      nombre: this.edNombre,
+      criticidad: this.edCriticidad,
+      descripcion: this.edDescripcion || undefined,
+      ubicacion: this.edUbicacion || undefined,
+      fabricante: this.edFabricante || undefined,
+      modelo: this.edModelo || undefined,
+    }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.editing.set(false);
+        this.load(a.id);
+      },
+      error: (err) => {
+        this.saveError.set(err?.error?.message ?? 'Error al guardar');
+        this.saving.set(false);
+      },
     });
   }
 

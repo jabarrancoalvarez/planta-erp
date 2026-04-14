@@ -56,6 +56,13 @@ public class ListaMateriales : SoftDeletableEntity<ListaMaterialesId>
         }
     }
 
+    public void Actualizar(string nombre, string? descripcion)
+    {
+        Nombre = nombre.Trim();
+        Descripcion = descripcion;
+        MarkUpdated();
+    }
+
     public void Desactivar()
     {
         Activo = false;

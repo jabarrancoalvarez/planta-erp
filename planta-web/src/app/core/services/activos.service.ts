@@ -74,6 +74,10 @@ export class ActivosService {
     return this.api.post<string>('/activos', req);
   }
 
+  updateActivo(id: string, req: { nombre: string; criticidad: CriticidadActivo; descripcion?: string; ubicacion?: string; fabricante?: string; modelo?: string }): Observable<string> {
+    return this.api.put<string>(`/activos/${id}`, req);
+  }
+
   cambiarEstado(id: string, estado: EstadoActivo): Observable<string> {
     return this.api.put<string>(`/activos/${id}/estado`, { estado });
   }

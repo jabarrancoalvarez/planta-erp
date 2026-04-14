@@ -3,6 +3,7 @@ using PlanTA.Produccion.Application.Features.Rutas.CreateRuta;
 using PlanTA.Produccion.Application.Features.Rutas.DeleteRuta;
 using PlanTA.Produccion.Application.Features.Rutas.GetRuta;
 using PlanTA.Produccion.Application.Features.Rutas.ListRutas;
+using PlanTA.Produccion.Application.Features.Rutas.UpdateRuta;
 using PlanTA.SharedKernel.Extensions;
 
 namespace PlanTA.API.Endpoints.Produccion;
@@ -37,6 +38,14 @@ public sealed class RutasEndpoints : IEndpointGroup
         .WithName("CreateRuta")
         .WithTags("Rutas");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdateRutaRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdateRutaCommand(id, req.Nombre, req.Descripcion), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("UpdateRuta")
+        .WithTags("Rutas");
+
         group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new DeleteRutaCommand(id), ct);
@@ -46,3 +55,5 @@ public sealed class RutasEndpoints : IEndpointGroup
         .WithTags("Rutas");
     }
 }
+
+public record UpdateRutaRequest(string Nombre, string? Descripcion);
