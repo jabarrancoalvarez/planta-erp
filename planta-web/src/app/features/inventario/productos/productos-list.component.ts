@@ -112,10 +112,12 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
                 <label class="form-label">Unidad Medida *</label>
                 <select class="form-select" formControlName="unidadMedida">
                   <option value="">Seleccionar...</option>
-                  <option value="kg">kg</option>
-                  <option value="ud">ud</option>
-                  <option value="m">m</option>
-                  <option value="l">l</option>
+                  <option value="Kilogramo">Kilogramo (kg)</option>
+                  <option value="Unidad">Unidad (ud)</option>
+                  <option value="Metro">Metro (m)</option>
+                  <option value="Litro">Litro (l)</option>
+                  <option value="Gramo">Gramo (g)</option>
+                  <option value="Mililitro">Mililitro (ml)</option>
                 </select>
               </div>
             </div>

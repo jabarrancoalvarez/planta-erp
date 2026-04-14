@@ -136,7 +136,7 @@ public sealed class IdentityService(
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var expirationMinutes = configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 15);
+        var expirationMinutes = configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 60);
 
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"],
