@@ -276,6 +276,23 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// -- Demo seed CLI mode --
+if (args.Contains("--seed-demo"))
+{
+    var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("DemoSeed");
+    try
+    {
+        await PlanTA.API.DemoDataSeeder.RunAsync(app.Services, logger);
+        return;
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Demo seed FALLÓ");
+        Environment.ExitCode = 1;
+        return;
+    }
+}
+
 // -- Middleware pipeline --
 app.UseExceptionHandler();
 

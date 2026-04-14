@@ -38,6 +38,10 @@ export class AppShellComponent {
     { label: 'Compras', icon: 'shopping-cart', route: '/app/compras', roles: ['Administrador', 'GerentePlanta', 'Compras'] },
     { label: 'Ventas', icon: 'truck', route: '/app/ventas', roles: ['Administrador', 'GerentePlanta', 'Ventas'] },
     { label: 'Calidad', icon: 'check-circle', route: '/app/calidad', roles: ['Administrador', 'GerentePlanta', 'Calidad'] },
+    { label: 'Activos', icon: 'cpu', route: '/app/activos', roles: ['Administrador', 'GerentePlanta', 'JefeProduccion'] },
+    { label: 'Mantenimiento', icon: 'tool', route: '/app/mantenimiento', roles: ['Administrador', 'GerentePlanta', 'JefeProduccion', 'Operario'] },
+    { label: 'Incidencias', icon: 'alert-triangle', route: '/app/incidencias', roles: ALL_ROLES },
+    { label: 'Movil', icon: 'smartphone', route: '/app/movil', roles: ['Administrador', 'Operario'] },
     { label: 'Configuracion', icon: 'settings', route: '/app/settings', roles: ALL_ROLES },
   ];
 

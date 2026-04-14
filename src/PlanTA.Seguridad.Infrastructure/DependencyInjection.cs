@@ -62,6 +62,7 @@ public static class DependencyInjection
         });
 
         // ── Services ──
+        services.AddHttpContextAccessor();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ICurrentTenant, CurrentTenant>();
 
