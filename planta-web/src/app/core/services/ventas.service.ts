@@ -118,6 +118,10 @@ export class VentasService {
     return this.api.put(`/ventas/pedidos/${id}/estado`, { estadoDestino, motivo });
   }
 
+  updatePedido(id: string, data: { fechaEntregaEstimada?: string | null; direccionEntrega?: string | null; observaciones?: string | null }): Observable<string> {
+    return this.api.put(`/ventas/pedidos/${id}`, data);
+  }
+
   deletePedido(id: string): Observable<string> {
     return this.api.delete(`/ventas/pedidos/${id}`);
   }

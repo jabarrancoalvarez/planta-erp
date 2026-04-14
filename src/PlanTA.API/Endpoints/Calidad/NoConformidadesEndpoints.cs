@@ -5,6 +5,7 @@ using PlanTA.Calidad.Application.Features.NoConformidades.CreateNC;
 using PlanTA.Calidad.Application.Features.NoConformidades.DeleteNC;
 using PlanTA.Calidad.Application.Features.NoConformidades.GetNC;
 using PlanTA.Calidad.Application.Features.NoConformidades.ListNCs;
+using PlanTA.Calidad.Application.Features.NoConformidades.UpdateNC;
 using PlanTA.Calidad.Domain.Enums;
 using PlanTA.SharedKernel.Extensions;
 
@@ -40,6 +41,14 @@ public sealed class NoConformidadesEndpoints : IEndpointGroup
         .WithName("CreateNoConformidad")
         .WithTags("NoConformidades");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdateNCRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdateNCCommand(id, req.Descripcion, req.Severidad, req.ResponsableUserId), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("UpdateNoConformidad")
+        .WithTags("NoConformidades");
+
         group.MapPut("/{id:guid}/estado", async (Guid id, CambiarEstadoNCRequest req, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new CambiarEstadoNCCommand(id, req.EstadoDestino, req.CausaRaiz), ct);
@@ -66,6 +75,8 @@ public sealed class NoConformidadesEndpoints : IEndpointGroup
         .WithTags("NoConformidades");
     }
 }
+
+public record UpdateNCRequest(string Descripcion, SeveridadNC Severidad, string? ResponsableUserId);
 
 public record CambiarEstadoNCRequest(EstadoNoConformidad EstadoDestino, string? CausaRaiz = null);
 

@@ -5,6 +5,7 @@ using PlanTA.Compras.Application.Features.OrdenesCompra.CreateOC;
 using PlanTA.Compras.Application.Features.OrdenesCompra.DeleteOC;
 using PlanTA.Compras.Application.Features.OrdenesCompra.GetOC;
 using PlanTA.Compras.Application.Features.OrdenesCompra.ListOCs;
+using PlanTA.Compras.Application.Features.OrdenesCompra.UpdateOC;
 using PlanTA.Compras.Domain.Enums;
 using PlanTA.SharedKernel.Extensions;
 
@@ -49,6 +50,14 @@ public sealed class OrdenesCompraEndpoints : IEndpointGroup
         .WithName("AddLineaOC")
         .WithTags("OrdenesCompra");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdateOCRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdateOCCommand(id, req.FechaEntregaEstimada, req.Observaciones), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("UpdateOrdenCompra")
+        .WithTags("OrdenesCompra");
+
         group.MapPut("/{id:guid}/estado", async (Guid id, CambiarEstadoOCRequest req, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new CambiarEstadoOCCommand(id, req.EstadoDestino, req.Motivo), ct);
@@ -72,5 +81,7 @@ public record AddLineaOCRequest(
     string Descripcion,
     decimal Cantidad,
     decimal PrecioUnitario);
+
+public record UpdateOCRequest(DateTimeOffset? FechaEntregaEstimada, string? Observaciones);
 
 public record CambiarEstadoOCRequest(EstadoOC EstadoDestino, string? Motivo = null);

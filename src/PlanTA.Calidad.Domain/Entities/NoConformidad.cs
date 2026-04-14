@@ -53,6 +53,19 @@ public class NoConformidad : SoftDeletableEntity<NoConformidadId>
         return nc;
     }
 
+    public Result<bool> Editar(string descripcion, SeveridadNC severidad, string? responsableUserId)
+    {
+        if (EstadoNoConformidad is EstadoNoConformidad.Cerrada)
+            return Result<bool>.Failure(
+                NoConformidadErrors.TransicionInvalida(EstadoNoConformidad.ToString(), "Editar"));
+
+        Descripcion = descripcion;
+        SeveridadNC = severidad;
+        ResponsableUserId = responsableUserId;
+        MarkUpdated();
+        return Result<bool>.Success(true);
+    }
+
     public Result<bool> Investigar()
     {
         if (EstadoNoConformidad != EstadoNoConformidad.Abierta)

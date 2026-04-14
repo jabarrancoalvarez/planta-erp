@@ -5,6 +5,7 @@ using PlanTA.Produccion.Application.Features.OrdenesFabricacion.DeleteOF;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.GetOF;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.ListOFs;
 using PlanTA.Produccion.Application.Features.OrdenesFabricacion.RegistrarProduccion;
+using PlanTA.Produccion.Application.Features.OrdenesFabricacion.UpdateOF;
 using PlanTA.Produccion.Domain.Enums;
 using PlanTA.SharedKernel.Extensions;
 
@@ -40,6 +41,14 @@ public sealed class OrdenesFabricacionEndpoints : IEndpointGroup
         .WithName("CreateOrdenFabricacion")
         .WithTags("OrdenesFabricacion");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdateOFRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdateOFCommand(id, req.Prioridad, req.Observaciones), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("UpdateOrdenFabricacion")
+        .WithTags("OrdenesFabricacion");
+
         group.MapPut("/{id:guid}/estado", async (Guid id, CambiarEstadoRequest req, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new CambiarEstadoOFCommand(id, req.EstadoDestino, req.Motivo), ct);
@@ -66,6 +75,8 @@ public sealed class OrdenesFabricacionEndpoints : IEndpointGroup
         .WithTags("OrdenesFabricacion");
     }
 }
+
+public record UpdateOFRequest(int Prioridad, string? Observaciones);
 
 public record CambiarEstadoRequest(EstadoOF EstadoDestino, string? Motivo = null);
 

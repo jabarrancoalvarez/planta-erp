@@ -44,6 +44,19 @@ public class Pedido : SoftDeletableEntity<PedidoId>
         };
     }
 
+    public Result<bool> Editar(DateTimeOffset? fechaEntregaEstimada, string? direccionEntrega, string? observaciones)
+    {
+        if (EstadoPedido is EstadoPedido.Entregado or EstadoPedido.Cancelado)
+            return Result<bool>.Failure(
+                PedidoErrors.TransicionInvalida(EstadoPedido.ToString(), "Editar"));
+
+        FechaEntregaEstimada = fechaEntregaEstimada;
+        DireccionEntrega = direccionEntrega;
+        Observaciones = observaciones;
+        MarkUpdated();
+        return Result<bool>.Success(true);
+    }
+
     public Result<LineaPedido> AgregarLinea(
         Guid productoId, string descripcion, decimal cantidad, decimal precioUnitario, decimal descuento = 0)
     {

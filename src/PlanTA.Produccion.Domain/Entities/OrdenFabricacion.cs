@@ -55,6 +55,18 @@ public class OrdenFabricacion : SoftDeletableEntity<OrdenFabricacionId>
         return of;
     }
 
+    public Result<bool> Editar(int prioridad, string? observaciones)
+    {
+        if (EstadoOF is EstadoOF.Completada or EstadoOF.Cancelada)
+            return Result<bool>.Failure(
+                OrdenFabricacionErrors.TransicionInvalida(EstadoOF.ToString(), "Editar"));
+
+        Prioridad = prioridad;
+        Observaciones = observaciones;
+        MarkUpdated();
+        return Result<bool>.Success(true);
+    }
+
     public Result<bool> Preparar()
     {
         if (EstadoOF != EstadoOF.Planificada)

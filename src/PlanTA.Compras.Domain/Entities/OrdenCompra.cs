@@ -41,6 +41,18 @@ public class OrdenCompra : SoftDeletableEntity<OrdenCompraId>
         };
     }
 
+    public Result<bool> Editar(DateTimeOffset? fechaEntregaEstimada, string? observaciones)
+    {
+        if (EstadoOC is EstadoOC.Recibida or EstadoOC.Cancelada)
+            return Result<bool>.Failure(
+                OrdenCompraErrors.TransicionInvalida(EstadoOC.ToString(), "Editar"));
+
+        FechaEntregaEstimada = fechaEntregaEstimada;
+        Observaciones = observaciones;
+        MarkUpdated();
+        return Result<bool>.Success(true);
+    }
+
     public Result<LineaOrdenCompra> AgregarLinea(
         Guid productoId, string descripcion, decimal cantidad, decimal precioUnitario)
     {

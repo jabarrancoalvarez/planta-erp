@@ -118,6 +118,10 @@ export class ComprasService {
     return this.api.put(`/compras/ordenes/${id}/estado`, { estadoDestino, motivo });
   }
 
+  updateOC(id: string, data: { fechaEntregaEstimada?: string | null; observaciones?: string | null }): Observable<string> {
+    return this.api.put(`/compras/ordenes/${id}`, data);
+  }
+
   deleteOC(id: string): Observable<string> {
     return this.api.delete(`/compras/ordenes/${id}`);
   }

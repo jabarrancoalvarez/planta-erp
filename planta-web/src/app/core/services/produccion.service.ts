@@ -151,6 +151,10 @@ export class ProduccionService {
     return this.api.put(`/produccion/ordenes/${id}/estado`, { estadoDestino, motivo });
   }
 
+  updateOF(id: string, data: { prioridad: number; observaciones?: string | null }): Observable<string> {
+    return this.api.put(`/produccion/ordenes/${id}`, data);
+  }
+
   deleteOF(id: string): Observable<string> {
     return this.api.delete(`/produccion/ordenes/${id}`);
   }

@@ -59,6 +59,7 @@ export interface NCDetailDto {
   estadoNoConformidad: string;
   causaRaiz: string | null;
   fechaDeteccion: string;
+  responsableUserId: string | null;
   accionesCorrectivas: AccionCorrectivaDto[];
   createdAt: string;
 }
@@ -121,6 +122,10 @@ export class CalidadService {
 
   cambiarEstadoNC(id: string, estadoDestino: string, causaRaiz?: string): Observable<string> {
     return this.api.put(`/calidad/no-conformidades/${id}/estado`, { estadoDestino, causaRaiz });
+  }
+
+  updateNC(id: string, data: { descripcion: string; severidad: string; responsableUserId?: string | null }): Observable<string> {
+    return this.api.put(`/calidad/no-conformidades/${id}`, data);
   }
 
   updatePlantilla(id: string, data: { nombre: string; descripcion?: string }): Observable<string> {

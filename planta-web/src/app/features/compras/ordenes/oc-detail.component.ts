@@ -1,5 +1,6 @@
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ComprasService, OCDetailDto } from '../../../core/services/compras.service';
 import { NotificationService } from '../../../shared/components/toast/notification.service';
@@ -8,14 +9,15 @@ import { NotificationService } from '../../../shared/components/toast/notificati
   selector: 'app-oc-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="detail-page">
       <div class="detail-page__header">
         <button class="detail-page__back" (click)="goBack()">&larr; Volver</button>
         <h1 class="detail-page__title">Orden de Compra</h1>
-        @if (item()) {
-          <button class="detail-page__back" style="margin-left:auto;background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
+        @if (item() && !editing()) {
+          <button class="detail-page__back" style="margin-left:auto;" (click)="startEdit()">Editar</button>
+          <button class="detail-page__back" style="background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
         }
       </div>
 
@@ -106,7 +108,27 @@ import { NotificationService } from '../../../shared/components/toast/notificati
           }
         </div>
 
-        @if (oc.observaciones) {
+        @if (editing()) {
+          <div class="detail-page__section">
+            <h2 class="detail-page__section-title">Editar</h2>
+            <div class="detail-page__grid">
+              <div class="detail-page__field">
+                <label class="detail-page__field-label">Fecha Entrega Estimada</label>
+                <input type="date" [(ngModel)]="editFecha" />
+              </div>
+              <div class="detail-page__field">
+                <label class="detail-page__field-label">Observaciones</label>
+                <input [(ngModel)]="editObservaciones" />
+              </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+              <button class="btn-primary" (click)="saveEdit()" [disabled]="savingEdit()">{{ savingEdit() ? 'Guardando...' : 'Guardar' }}</button>
+              <button class="btn-outline" (click)="cancelEdit()">Cancelar</button>
+            </div>
+          </div>
+        }
+
+        @if (!editing() && oc.observaciones) {
           <div class="detail-page__section">
             <h2 class="detail-page__section-title">Observaciones</h2>
             <p>{{ oc.observaciones }}</p>
@@ -136,7 +158,40 @@ export class OCDetailComponent implements OnInit {
   readonly item = signal<OCDetailDto | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly editing = signal(false);
+  readonly savingEdit = signal(false);
+  editFecha = '';
+  editObservaciones = '';
   private id = '';
+
+  startEdit(): void {
+    const oc = this.item();
+    if (!oc) return;
+    this.editFecha = oc.fechaEntregaEstimada ? new Date(oc.fechaEntregaEstimada).toISOString().slice(0, 10) : '';
+    this.editObservaciones = oc.observaciones ?? '';
+    this.editing.set(true);
+  }
+
+  cancelEdit(): void { this.editing.set(false); }
+
+  saveEdit(): void {
+    this.savingEdit.set(true);
+    this.svc.updateOC(this.id, {
+      fechaEntregaEstimada: this.editFecha ? new Date(this.editFecha).toISOString() : null,
+      observaciones: this.editObservaciones || null,
+    }).subscribe({
+      next: () => {
+        this.savingEdit.set(false);
+        this.editing.set(false);
+        this.notify.success('Orden actualizada');
+        this.loadDetail();
+      },
+      error: (err) => {
+        this.savingEdit.set(false);
+        this.notify.error(err?.error?.message ?? 'Error al actualizar');
+      },
+    });
+  }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id')!;

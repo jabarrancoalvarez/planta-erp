@@ -5,6 +5,7 @@ using PlanTA.Ventas.Application.Features.Pedidos.CreatePedido;
 using PlanTA.Ventas.Application.Features.Pedidos.DeletePedido;
 using PlanTA.Ventas.Application.Features.Pedidos.GetPedido;
 using PlanTA.Ventas.Application.Features.Pedidos.ListPedidos;
+using PlanTA.Ventas.Application.Features.Pedidos.UpdatePedido;
 using PlanTA.Ventas.Domain.Enums;
 using PlanTA.SharedKernel.Extensions;
 
@@ -49,6 +50,14 @@ public sealed class PedidosEndpoints : IEndpointGroup
         .WithName("AddLineaPedido")
         .WithTags("Pedidos");
 
+        group.MapPut("/{id:guid}", async (Guid id, UpdatePedidoRequest req, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new UpdatePedidoCommand(id, req.FechaEntregaEstimada, req.DireccionEntrega, req.Observaciones), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("UpdatePedido")
+        .WithTags("Pedidos");
+
         group.MapPut("/{id:guid}/estado", async (Guid id, CambiarEstadoPedidoRequest req, IMediator m, CancellationToken ct) =>
         {
             var result = await m.Send(new CambiarEstadoPedidoCommand(id, req.EstadoDestino, req.Motivo), ct);
@@ -73,5 +82,10 @@ public record AddLineaPedidoRequest(
     decimal Cantidad,
     decimal PrecioUnitario,
     decimal Descuento = 0);
+
+public record UpdatePedidoRequest(
+    DateTimeOffset? FechaEntregaEstimada,
+    string? DireccionEntrega,
+    string? Observaciones);
 
 public record CambiarEstadoPedidoRequest(EstadoPedido EstadoDestino, string? Motivo = null);
