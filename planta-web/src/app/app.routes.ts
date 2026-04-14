@@ -66,6 +66,26 @@ export const routes: Routes = [
           import('./features/calidad/calidad.routes').then(m => m.CALIDAD_ROUTES),
       },
       {
+        path: 'activos',
+        loadChildren: () =>
+          import('./features/activos/activos.routes').then(m => m.ACTIVOS_ROUTES),
+      },
+      {
+        path: 'mantenimiento',
+        loadChildren: () =>
+          import('./features/mantenimiento/mantenimiento.routes').then(m => m.MANTENIMIENTO_ROUTES),
+      },
+      {
+        path: 'incidencias',
+        loadChildren: () =>
+          import('./features/incidencias/incidencias.routes').then(m => m.INCIDENCIAS_ROUTES),
+      },
+      {
+        path: 'movil',
+        loadChildren: () =>
+          import('./features/movil/movil.routes').then(m => m.MOVIL_ROUTES),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./pages/app/settings-page/settings-page.component').then(
