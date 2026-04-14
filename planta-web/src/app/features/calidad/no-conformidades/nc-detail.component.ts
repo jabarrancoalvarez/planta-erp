@@ -14,6 +14,9 @@ import { NotificationService } from '../../../shared/components/toast/notificati
       <div class="detail-page__header">
         <button class="detail-page__back" (click)="goBack()">&larr; Volver</button>
         <h1 class="detail-page__title">No Conformidad</h1>
+        @if (item()) {
+          <button class="detail-page__back" style="margin-left:auto;background:#fee;color:#c00;" (click)="onDelete()">Eliminar</button>
+        }
       </div>
 
       @if (loading()) {
@@ -144,6 +147,16 @@ export class NCDetailComponent implements OnInit {
   }
 
   goBack(): void { this.router.navigate(['/app/calidad/no-conformidades']); }
+
+  onDelete(): void {
+    const nc = this.item();
+    if (!nc) return;
+    if (!confirm(`¿Eliminar no conformidad "${nc.codigo}"?`)) return;
+    this.svc.deleteNC(this.id).subscribe({
+      next: () => this.router.navigate(['/app/calidad/no-conformidades']),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 
   getAvailableTransitions(state: string): string[] {
     const map: Record<string, string[]> = {

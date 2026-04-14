@@ -1,6 +1,7 @@
 using MediatR;
 using PlanTA.Calidad.Application.Features.Plantillas.AddCriterio;
 using PlanTA.Calidad.Application.Features.Plantillas.CreatePlantilla;
+using PlanTA.Calidad.Application.Features.Plantillas.DeletePlantilla;
 using PlanTA.Calidad.Application.Features.Plantillas.GetPlantilla;
 using PlanTA.Calidad.Application.Features.Plantillas.ListPlantillas;
 using PlanTA.SharedKernel.Extensions;
@@ -45,6 +46,14 @@ public sealed class PlantillasEndpoints : IEndpointGroup
             return result.ToHttpResult(201);
         })
         .WithName("AddCriterio")
+        .WithTags("Plantillas");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeletePlantillaCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeletePlantilla")
         .WithTags("Plantillas");
     }
 }

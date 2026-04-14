@@ -2,6 +2,7 @@ using MediatR;
 using PlanTA.Calidad.Application.Features.NoConformidades.AddAccionCorrectiva;
 using PlanTA.Calidad.Application.Features.NoConformidades.CambiarEstadoNC;
 using PlanTA.Calidad.Application.Features.NoConformidades.CreateNC;
+using PlanTA.Calidad.Application.Features.NoConformidades.DeleteNC;
 using PlanTA.Calidad.Application.Features.NoConformidades.GetNC;
 using PlanTA.Calidad.Application.Features.NoConformidades.ListNCs;
 using PlanTA.Calidad.Domain.Enums;
@@ -54,6 +55,14 @@ public sealed class NoConformidadesEndpoints : IEndpointGroup
             return result.ToHttpResult(201);
         })
         .WithName("AddAccionCorrectiva")
+        .WithTags("NoConformidades");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteNCCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteNoConformidad")
         .WithTags("NoConformidades");
     }
 }
