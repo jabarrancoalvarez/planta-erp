@@ -1,5 +1,6 @@
 using MediatR;
 using PlanTA.Inventario.Application.Features.Productos.CreateProducto;
+using PlanTA.Inventario.Application.Features.Productos.DeleteProducto;
 using PlanTA.Inventario.Application.Features.Productos.GetProducto;
 using PlanTA.Inventario.Application.Features.Productos.ListProductos;
 using PlanTA.Inventario.Application.Features.Productos.UpdateProducto;
@@ -44,6 +45,14 @@ public sealed class ProductosEndpoints : IEndpointGroup
             return result.ToHttpResult();
         })
         .WithName("UpdateProducto")
+        .WithTags("Productos");
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
+        {
+            var result = await m.Send(new DeleteProductoCommand(id), ct);
+            return result.ToHttpResult();
+        })
+        .WithName("DeleteProducto")
         .WithTags("Productos");
     }
 }

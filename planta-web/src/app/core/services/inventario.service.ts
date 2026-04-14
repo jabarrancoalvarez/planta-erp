@@ -93,6 +93,10 @@ export class InventarioService {
     return this.api.put(`/inventario/productos/${id}`, data);
   }
 
+  deleteProducto(id: string): Observable<string> {
+    return this.api.delete(`/inventario/productos/${id}`);
+  }
+
   listAlmacenes(): Observable<AlmacenListDto[]> {
     return this.api.get('/inventario/almacenes');
   }
