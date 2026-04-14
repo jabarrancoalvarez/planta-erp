@@ -9,7 +9,7 @@ namespace PlanTA.IA.Infrastructure.Services;
 
 public class ClaudeService : IClaudeService
 {
-    private const string DefaultModel = "claude-opus-4-6";
+    private const string DefaultModel = "claude-sonnet-4-6";
     private readonly HttpClient _http;
     private readonly string? _apiKey;
     private readonly string _model;
