@@ -314,18 +314,4 @@ app.UseAuthorization();
 // -- Map all endpoint groups via reflection --
 app.MapEndpointGroups();
 
-// -- Debug endpoint (quitar tras diagnóstico) --
-app.MapGet("/api/v1/debug/whoami", (HttpContext ctx, PlanTA.SharedKernel.ICurrentTenant tenant) =>
-{
-    return Results.Ok(new
-    {
-        isAuthenticated = ctx.User?.Identity?.IsAuthenticated ?? false,
-        claims = ctx.User?.Claims.Select(c => new { c.Type, c.Value }).ToArray(),
-        tenantEmpresaId = tenant.EmpresaId,
-        tenantUserId = tenant.UserId,
-        tenantRole = tenant.Role,
-        buildMarker = "2026-04-14-tenant-fix"
-    });
-});
-
 app.Run();

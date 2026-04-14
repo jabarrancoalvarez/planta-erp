@@ -11,19 +11,7 @@ public sealed class ValidationExceptionHandler : IExceptionHandler
         CancellationToken cancellationToken)
     {
         if (exception is not ValidationException validationException)
-        {
-            // Diagnóstico temporal: devolver detalles completos para debuggear en producción
-            httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await httpContext.Response.WriteAsJsonAsync(new
-            {
-                Type = exception.GetType().FullName,
-                Title = exception.Message,
-                Status = 500,
-                Inner = exception.InnerException?.Message,
-                Stack = exception.StackTrace?.Split('\n').Take(15).ToArray()
-            }, cancellationToken);
-            return true;
-        }
+            return false;
 
         var errors = validationException.Errors
             .GroupBy(e => e.PropertyName)
