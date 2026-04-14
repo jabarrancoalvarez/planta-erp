@@ -187,6 +187,10 @@ builder.Services.AddIAInfrastructure(builder.Configuration);
 // -- Authorization --
 builder.Services.AddAuthorization();
 
+// -- JSON: aceptar enums como string o numero --
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
+
 var app = builder.Build();
 
 // -- Ensure schemas exist & seed data --
