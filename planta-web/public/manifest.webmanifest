@@ -1,0 +1,18 @@
+{
+  "name": "PlanTA — Planta",
+  "short_name": "PlanTA",
+  "start_url": "/app/movil",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f5f7",
+  "theme_color": "#dc2626",
+  "description": "ERP/MES industrial para PYMEs — app de planta para operarios",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
