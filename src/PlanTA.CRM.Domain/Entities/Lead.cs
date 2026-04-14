@@ -36,4 +36,14 @@ public class Lead : SoftDeletableEntity<LeadId>
 
     public void CambiarEstado(EstadoLead estado) { Estado = estado; MarkUpdated(); }
     public void Asignar(Guid userId) { AsignadoAUserId = userId; MarkUpdated(); }
+
+    public void Editar(string nombre, string? empresa, string? email, string? telefono, string? notas)
+    {
+        Nombre = nombre.Trim();
+        Empresa = empresa;
+        Email = email;
+        Telefono = telefono;
+        Notas = notas;
+        MarkUpdated();
+    }
 }

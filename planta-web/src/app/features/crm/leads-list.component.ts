@@ -72,20 +72,40 @@ import { CrmService, LeadListDto, EstadoLead, OrigenLead } from '../../core/serv
                 <th>Telefono</th>
                 <th>Origen</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (l of items(); track l.id) {
-                <tr>
-                  <td>{{ l.nombre }}</td>
-                  <td>{{ l.empresa ?? '---' }}</td>
-                  <td>{{ l.email ?? '---' }}</td>
-                  <td>{{ l.telefono ?? '---' }}</td>
-                  <td><span class="badge badge--neutral">{{ l.origen }}</span></td>
-                  <td><span class="badge">{{ l.estado }}</span></td>
-                </tr>
+                @if (editingId() === l.id) {
+                  <tr>
+                    <td><input [(ngModel)]="editNombre" /></td>
+                    <td><input [(ngModel)]="editEmpresa" /></td>
+                    <td><input [(ngModel)]="editEmail" /></td>
+                    <td><input [(ngModel)]="editTelefono" /></td>
+                    <td><span class="badge badge--neutral">{{ l.origen }}</span></td>
+                    <td><span class="badge">{{ l.estado }}</span></td>
+                    <td>
+                      <button class="btn-primary btn-sm" (click)="saveEdit(l.id)" [disabled]="savingEdit()">Guardar</button>
+                      <button class="btn-outline btn-sm" (click)="cancelEdit()">Cancelar</button>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr>
+                    <td>{{ l.nombre }}</td>
+                    <td>{{ l.empresa ?? '---' }}</td>
+                    <td>{{ l.email ?? '---' }}</td>
+                    <td>{{ l.telefono ?? '---' }}</td>
+                    <td><span class="badge badge--neutral">{{ l.origen }}</span></td>
+                    <td><span class="badge">{{ l.estado }}</span></td>
+                    <td>
+                      <button class="btn-outline btn-sm" (click)="startEdit(l)">Editar</button>
+                      <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(l)">Eliminar</button>
+                    </td>
+                  </tr>
+                }
               } @empty {
-                <tr><td colspan="6" class="empty-state">Sin leads</td></tr>
+                <tr><td colspan="7" class="empty-state">Sin leads</td></tr>
               }
             </tbody>
           </table>
@@ -115,6 +135,44 @@ export class LeadsListComponent implements OnInit {
   newEmpresa = '';
   newEmail = '';
   newTelefono = '';
+
+  readonly editingId = signal<string | null>(null);
+  readonly savingEdit = signal(false);
+  editNombre = '';
+  editEmpresa = '';
+  editEmail = '';
+  editTelefono = '';
+  private editNotas: string | null = null;
+
+  startEdit(l: LeadListDto): void {
+    this.editingId.set(l.id);
+    this.editNombre = l.nombre;
+    this.editEmpresa = l.empresa ?? '';
+    this.editEmail = l.email ?? '';
+    this.editTelefono = l.telefono ?? '';
+    this.editNotas = l.notas;
+  }
+  cancelEdit(): void { this.editingId.set(null); }
+  saveEdit(id: string): void {
+    this.savingEdit.set(true);
+    this.svc.updateLead(id, {
+      nombre: this.editNombre,
+      empresa: this.editEmpresa || null,
+      email: this.editEmail || null,
+      telefono: this.editTelefono || null,
+      notas: this.editNotas,
+    }).subscribe({
+      next: () => { this.savingEdit.set(false); this.editingId.set(null); this.load(); },
+      error: (err) => { this.savingEdit.set(false); this.error.set(err?.error?.message ?? 'Error al actualizar'); },
+    });
+  }
+  remove(l: LeadListDto): void {
+    if (!confirm(`¿Eliminar lead "${l.nombre}"?`)) return;
+    this.svc.deleteLead(l.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 
   ngOnInit(): void { this.load(); }
 

@@ -29,7 +29,7 @@ public sealed class ListOportunidadesQueryHandler(
                 o.Id.Value, o.Titulo, o.ClienteId, o.Fase,
                 o.ImporteEstimado, o.ProbabilidadPct,
                 o.ImporteEstimado * o.ProbabilidadPct / 100m,
-                o.FechaCierreEstimada))
+                o.FechaCierreEstimada, o.Descripcion))
             .ToListAsync(ct);
 
         return Result<PagedResult<OportunidadListDto>>.Success(

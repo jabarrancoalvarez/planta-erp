@@ -4,12 +4,12 @@ namespace PlanTA.CRM.Application.DTOs;
 
 public record LeadListDto(
     Guid Id, string Nombre, string? Empresa, string? Email, string? Telefono,
-    OrigenLead Origen, EstadoLead Estado, Guid? AsignadoAUserId);
+    OrigenLead Origen, EstadoLead Estado, Guid? AsignadoAUserId, string? Notas);
 
 public record OportunidadListDto(
     Guid Id, string Titulo, Guid? ClienteId, FaseOportunidad Fase,
     decimal ImporteEstimado, int ProbabilidadPct, decimal ValorPonderado,
-    DateTimeOffset? FechaCierreEstimada);
+    DateTimeOffset? FechaCierreEstimada, string? Descripcion);
 
 public record ActividadCrmDto(
     Guid Id, TipoActividadCrm Tipo, string Asunto, string? Detalle,

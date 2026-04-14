@@ -36,7 +36,7 @@ public sealed class ListLeadsQueryHandler(
             .Take(request.PageSize)
             .Select(l => new LeadListDto(
                 l.Id.Value, l.Nombre, l.Empresa, l.Email, l.Telefono,
-                l.Origen, l.Estado, l.AsignadoAUserId))
+                l.Origen, l.Estado, l.AsignadoAUserId, l.Notas))
             .ToListAsync(ct);
 
         return Result<PagedResult<LeadListDto>>.Success(

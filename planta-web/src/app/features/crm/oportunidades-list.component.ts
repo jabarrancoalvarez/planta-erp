@@ -62,26 +62,47 @@ import { CrmService, OportunidadListDto, FaseOportunidad } from '../../core/serv
                 <th style="text-align:right">Ponderado</th>
                 <th>Cierre est.</th>
                 <th>Avanzar</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (o of items(); track o.id) {
-                <tr>
-                  <td>{{ o.titulo }}</td>
-                  <td><span class="badge">{{ o.fase }}</span></td>
-                  <td style="text-align:right">{{ o.importeEstimado | number:'1.2-2' }} &euro;</td>
-                  <td style="text-align:right">{{ o.probabilidadPct }}</td>
-                  <td style="text-align:right">{{ o.valorPonderado | number:'1.2-2' }} &euro;</td>
-                  <td>{{ o.fechaCierreEstimada ? (o.fechaCierreEstimada | date:'dd/MM/yyyy') : '---' }}</td>
-                  <td>
-                    <select (change)="avanzar(o, $any($event.target).value)">
-                      <option value="">--</option>
-                      @for (f of fases; track f) { <option [value]="f">{{ f }}</option> }
-                    </select>
-                  </td>
-                </tr>
+                @if (editingId() === o.id) {
+                  <tr>
+                    <td><input [(ngModel)]="editTitulo" /></td>
+                    <td><span class="badge">{{ o.fase }}</span></td>
+                    <td><input type="number" [(ngModel)]="editImporte" /></td>
+                    <td style="text-align:right">{{ o.probabilidadPct }}</td>
+                    <td style="text-align:right">---</td>
+                    <td><input type="date" [(ngModel)]="editFecha" /></td>
+                    <td>---</td>
+                    <td>
+                      <button class="btn-primary btn-sm" (click)="saveEdit(o.id)" [disabled]="savingEdit()">Guardar</button>
+                      <button class="btn-outline btn-sm" (click)="cancelEdit()">Cancelar</button>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr>
+                    <td>{{ o.titulo }}</td>
+                    <td><span class="badge">{{ o.fase }}</span></td>
+                    <td style="text-align:right">{{ o.importeEstimado | number:'1.2-2' }} &euro;</td>
+                    <td style="text-align:right">{{ o.probabilidadPct }}</td>
+                    <td style="text-align:right">{{ o.valorPonderado | number:'1.2-2' }} &euro;</td>
+                    <td>{{ o.fechaCierreEstimada ? (o.fechaCierreEstimada | date:'dd/MM/yyyy') : '---' }}</td>
+                    <td>
+                      <select (change)="avanzar(o, $any($event.target).value)">
+                        <option value="">--</option>
+                        @for (f of fases; track f) { <option [value]="f">{{ f }}</option> }
+                      </select>
+                    </td>
+                    <td>
+                      <button class="btn-outline btn-sm" (click)="startEdit(o)">Editar</button>
+                      <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(o)">Eliminar</button>
+                    </td>
+                  </tr>
+                }
               } @empty {
-                <tr><td colspan="7" class="empty-state">Sin oportunidades</td></tr>
+                <tr><td colspan="8" class="empty-state">Sin oportunidades</td></tr>
               }
             </tbody>
           </table>
@@ -106,6 +127,41 @@ export class OportunidadesListComponent implements OnInit {
   newTitulo = '';
   newImporte = 0;
   newDescripcion = '';
+
+  readonly editingId = signal<string | null>(null);
+  readonly savingEdit = signal(false);
+  editTitulo = '';
+  editImporte = 0;
+  editFecha = '';
+  private editDescripcion: string | null = null;
+
+  startEdit(o: OportunidadListDto): void {
+    this.editingId.set(o.id);
+    this.editTitulo = o.titulo;
+    this.editImporte = o.importeEstimado;
+    this.editFecha = o.fechaCierreEstimada ? new Date(o.fechaCierreEstimada).toISOString().slice(0, 10) : '';
+    this.editDescripcion = o.descripcion;
+  }
+  cancelEdit(): void { this.editingId.set(null); }
+  saveEdit(id: string): void {
+    this.savingEdit.set(true);
+    this.svc.updateOportunidad(id, {
+      titulo: this.editTitulo,
+      importeEstimado: Number(this.editImporte),
+      fechaCierreEstimada: this.editFecha ? new Date(this.editFecha).toISOString() : null,
+      descripcion: this.editDescripcion,
+    }).subscribe({
+      next: () => { this.savingEdit.set(false); this.editingId.set(null); this.load(); },
+      error: (err) => { this.savingEdit.set(false); this.error.set(err?.error?.message ?? 'Error al actualizar'); },
+    });
+  }
+  remove(o: OportunidadListDto): void {
+    if (!confirm(`¿Eliminar oportunidad "${o.titulo}"?`)) return;
+    this.svc.deleteOportunidad(o.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 
   ngOnInit(): void { this.load(); }
 

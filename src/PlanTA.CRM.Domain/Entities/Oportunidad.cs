@@ -44,6 +44,20 @@ public class Oportunidad : SoftDeletableEntity<OportunidadId>
         });
     }
 
+    public Result<bool> Editar(string titulo, decimal importeEstimado, DateTimeOffset? fechaCierreEstimada, string? descripcion)
+    {
+        if (Fase is FaseOportunidad.Ganada or FaseOportunidad.Perdida)
+            return Result<bool>.Failure(Error.Validation("Oportunidad.EstadoTerminal", "No se puede editar una oportunidad Ganada o Perdida"));
+        if (importeEstimado <= 0)
+            return Result<bool>.Failure(OportunidadErrors.ImporteInvalido);
+        Titulo = titulo.Trim();
+        ImporteEstimado = importeEstimado;
+        FechaCierreEstimada = fechaCierreEstimada;
+        Descripcion = descripcion;
+        MarkUpdated();
+        return Result<bool>.Success(true);
+    }
+
     public void AvanzarFase(FaseOportunidad nueva, int? probabilidadPct = null)
     {
         Fase = nueva;

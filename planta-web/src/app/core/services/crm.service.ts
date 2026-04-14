@@ -17,6 +17,7 @@ export interface LeadListDto {
   origen: OrigenLead;
   estado: EstadoLead;
   asignadoAUserId: string | null;
+  notas: string | null;
 }
 
 export interface OportunidadListDto {
@@ -28,6 +29,7 @@ export interface OportunidadListDto {
   probabilidadPct: number;
   valorPonderado: number;
   fechaCierreEstimada: string | null;
+  descripcion: string | null;
 }
 
 export interface CreateLeadRequest {
@@ -79,5 +81,21 @@ export class CrmService {
 
   avanzarFase(id: string, nuevaFase: FaseOportunidad, probabilidadPct?: number): Observable<unknown> {
     return this.api.post<unknown>(`/crm/oportunidades/${id}/avanzar`, { nuevaFase, probabilidadPct });
+  }
+
+  updateLead(id: string, data: { nombre: string; empresa: string | null; email: string | null; telefono: string | null; notas: string | null }): Observable<unknown> {
+    return this.api.put(`/crm/leads/${id}`, data);
+  }
+
+  deleteLead(id: string): Observable<unknown> {
+    return this.api.delete(`/crm/leads/${id}`);
+  }
+
+  updateOportunidad(id: string, data: { titulo: string; importeEstimado: number; fechaCierreEstimada: string | null; descripcion: string | null }): Observable<unknown> {
+    return this.api.put(`/crm/oportunidades/${id}`, data);
+  }
+
+  deleteOportunidad(id: string): Observable<unknown> {
+    return this.api.delete(`/crm/oportunidades/${id}`);
   }
 }
