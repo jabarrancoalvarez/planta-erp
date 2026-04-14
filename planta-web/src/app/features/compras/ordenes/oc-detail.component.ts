@@ -147,9 +147,9 @@ export class OCDetailComponent implements OnInit {
 
   getAvailableTransitions(state: string): string[] {
     const map: Record<string, string[]> = {
-      'Borrador': ['Pendiente', 'Cancelada'],
-      'Pendiente': ['Enviada', 'Cancelada'],
-      'Enviada': ['Recibida', 'Cancelada'],
+      'Borrador': ['Enviada', 'Cancelada'],
+      'Enviada': ['ParcialmenteRecibida', 'Recibida', 'Cancelada'],
+      'ParcialmenteRecibida': ['Recibida', 'Cancelada'],
     };
     return map[state] ?? [];
   }

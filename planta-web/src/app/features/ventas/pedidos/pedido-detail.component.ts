@@ -153,8 +153,9 @@ export class PedidoDetailComponent implements OnInit {
     const map: Record<string, string[]> = {
       'Borrador': ['Confirmado', 'Cancelado'],
       'Confirmado': ['EnPreparacion', 'Cancelado'],
-      'EnPreparacion': ['Expedido', 'Cancelado'],
-      'Expedido': ['Entregado'],
+      'EnPreparacion': ['ParcialmenteEnviado', 'Enviado', 'Cancelado'],
+      'ParcialmenteEnviado': ['Enviado', 'Cancelado'],
+      'Enviado': ['Entregado'],
     };
     return map[state] ?? [];
   }
