@@ -12,6 +12,7 @@ public static class FichajeErrors
 {
     public static Error NoJornadaAbierta => Error.Validation("Fichaje.NoJornadaAbierta", "No hay jornada abierta para cerrar");
     public static Error YaFichadoEntrada => Error.Validation("Fichaje.YaFichadoEntrada", "Ya hay una jornada abierta");
+    public static Error NotFound(Guid id) => Error.NotFound("Fichaje.NotFound", $"Fichaje '{id}' no encontrado");
 }
 
 public static class AusenciaErrors

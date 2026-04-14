@@ -82,20 +82,41 @@ import { AuthService } from '../../core/services/auth.service';
             </thead>
             <tbody>
               @for (a of items(); track a.id) {
-                <tr>
-                  <td>{{ a.empleadoNombre }}</td>
-                  <td>{{ a.tipo }}</td>
-                  <td>{{ a.fechaInicio | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ a.fechaFin | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ a.diasTotales }}</td>
-                  <td><span class="badge">{{ a.estado }}</span></td>
-                  <td>
-                    @if (a.estado === 'Solicitada') {
-                      <button class="btn-sm" (click)="aprobar(a)">Aprobar</button>
-                      <button class="btn-sm" (click)="rechazar(a)">Rechazar</button>
-                    }
-                  </td>
-                </tr>
+                @if (editingId() === a.id) {
+                  <tr>
+                    <td>{{ a.empleadoNombre }}</td>
+                    <td>
+                      <select [(ngModel)]="editTipo">
+                        @for (t of tipos; track t) { <option [value]="t">{{ t }}</option> }
+                      </select>
+                    </td>
+                    <td><input type="date" [(ngModel)]="editDesde" /></td>
+                    <td><input type="date" [(ngModel)]="editHasta" /></td>
+                    <td>---</td>
+                    <td>{{ a.estado }}</td>
+                    <td>
+                      <button class="btn-primary btn-sm" (click)="saveEdit(a.id)" [disabled]="savingEdit()">Guardar</button>
+                      <button class="btn-outline btn-sm" (click)="cancelEdit()">Cancelar</button>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr>
+                    <td>{{ a.empleadoNombre }}</td>
+                    <td>{{ a.tipo }}</td>
+                    <td>{{ a.fechaInicio | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ a.fechaFin | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ a.diasTotales }}</td>
+                    <td><span class="badge">{{ a.estado }}</span></td>
+                    <td>
+                      @if (a.estado === 'Solicitada') {
+                        <button class="btn-outline btn-sm" (click)="aprobar(a)">Aprobar</button>
+                        <button class="btn-outline btn-sm" (click)="rechazar(a)">Rechazar</button>
+                        <button class="btn-outline btn-sm" (click)="startEdit(a)">Editar</button>
+                      }
+                      <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(a)">Eliminar</button>
+                    </td>
+                  </tr>
+                }
               } @empty {
                 <tr><td colspan="7" class="empty-state">Sin ausencias</td></tr>
               }
@@ -128,6 +149,41 @@ export class AusenciasListComponent implements OnInit {
   newDesde = '';
   newHasta = '';
   newMotivo = '';
+
+  readonly editingId = signal<string | null>(null);
+  readonly savingEdit = signal(false);
+  editTipo: TipoAusencia = 'Vacaciones';
+  editDesde = '';
+  editHasta = '';
+  private editMotivo: string | null = null;
+
+  startEdit(a: AusenciaDto): void {
+    this.editingId.set(a.id);
+    this.editTipo = a.tipo;
+    this.editDesde = new Date(a.fechaInicio).toISOString().slice(0, 10);
+    this.editHasta = new Date(a.fechaFin).toISOString().slice(0, 10);
+    this.editMotivo = a.motivo;
+  }
+  cancelEdit(): void { this.editingId.set(null); }
+  saveEdit(id: string): void {
+    this.savingEdit.set(true);
+    this.svc.updateAusencia(id, {
+      tipo: this.editTipo,
+      fechaInicio: new Date(this.editDesde).toISOString(),
+      fechaFin: new Date(this.editHasta).toISOString(),
+      motivo: this.editMotivo,
+    }).subscribe({
+      next: () => { this.savingEdit.set(false); this.editingId.set(null); this.load(); },
+      error: (err) => { this.savingEdit.set(false); this.error.set(err?.error?.message ?? 'Error al actualizar'); },
+    });
+  }
+  remove(a: AusenciaDto): void {
+    if (!confirm(`¿Eliminar ausencia de "${a.empleadoNombre}"?`)) return;
+    this.svc.deleteAusencia(a.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 
   ngOnInit(): void {
     this.load();

@@ -47,4 +47,18 @@ public class ImputacionCoste : BaseEntity<ImputacionCosteId>
             EmpresaId = empresaId
         });
     }
+
+    public Result<bool> Editar(decimal cantidad, decimal precioUnitario, string? concepto, DateTimeOffset fecha)
+    {
+        var nuevoImporte = cantidad * precioUnitario;
+        if (nuevoImporte <= 0)
+            return Result<bool>.Failure(ImputacionCosteErrors.ImporteInvalido);
+        Cantidad = cantidad;
+        PrecioUnitario = precioUnitario;
+        Importe = nuevoImporte;
+        Concepto = concepto;
+        Fecha = fecha;
+        MarkUpdated();
+        return Result<bool>.Success(true);
+    }
 }

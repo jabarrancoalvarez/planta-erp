@@ -78,24 +78,44 @@ import { RrhhService, EmpleadoListDto } from '../../core/services/rrhh.service';
                 <th>Puesto</th>
                 <th>Departamento</th>
                 <th>Activo</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (e of items(); track e.id) {
-                <tr>
-                  <td><code>{{ e.codigo }}</code></td>
-                  <td>{{ e.nombre }} {{ e.apellidos }}</td>
-                  <td>{{ e.dni }}</td>
-                  <td>{{ e.puesto }}</td>
-                  <td>{{ e.departamento ?? '---' }}</td>
-                  <td>
-                    <span class="badge" [class.badge--success]="e.activo" [class.badge--neutral]="!e.activo">
-                      {{ e.activo ? 'Si' : 'No' }}
-                    </span>
-                  </td>
-                </tr>
+                @if (editingId() === e.id) {
+                  <tr>
+                    <td><code>{{ e.codigo }}</code></td>
+                    <td><input [(ngModel)]="editNombre" style="width:6rem" /> <input [(ngModel)]="editApellidos" style="width:6rem" /></td>
+                    <td>{{ e.dni }}</td>
+                    <td><input [(ngModel)]="editPuesto" /></td>
+                    <td><input [(ngModel)]="editDepartamento" /></td>
+                    <td>{{ e.activo ? 'Si' : 'No' }}</td>
+                    <td>
+                      <button class="btn-primary btn-sm" (click)="saveEdit(e.id)" [disabled]="savingEdit()">Guardar</button>
+                      <button class="btn-outline btn-sm" (click)="cancelEdit()">Cancelar</button>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr>
+                    <td><code>{{ e.codigo }}</code></td>
+                    <td>{{ e.nombre }} {{ e.apellidos }}</td>
+                    <td>{{ e.dni }}</td>
+                    <td>{{ e.puesto }}</td>
+                    <td>{{ e.departamento ?? '---' }}</td>
+                    <td>
+                      <span class="badge" [class.badge--success]="e.activo" [class.badge--neutral]="!e.activo">
+                        {{ e.activo ? 'Si' : 'No' }}
+                      </span>
+                    </td>
+                    <td>
+                      <button class="btn-outline btn-sm" (click)="startEdit(e)">Editar</button>
+                      <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(e)">Eliminar</button>
+                    </td>
+                  </tr>
+                }
               } @empty {
-                <tr><td colspan="6" class="empty-state">Sin empleados</td></tr>
+                <tr><td colspan="7" class="empty-state">Sin empleados</td></tr>
               }
             </tbody>
           </table>
@@ -124,6 +144,53 @@ export class EmpleadosListComponent implements OnInit {
   newDepartamento = '';
   newEmail = '';
   newCoste = 0;
+
+  readonly editingId = signal<string | null>(null);
+  readonly savingEdit = signal(false);
+  editNombre = '';
+  editApellidos = '';
+  editPuesto = '';
+  editDepartamento = '';
+  private editEmail: string | null = null;
+  private editTelefono: string | null = null;
+  private editCoste = 0;
+  private editDias = 22;
+
+  startEdit(e: EmpleadoListDto): void {
+    this.editingId.set(e.id);
+    this.editNombre = e.nombre;
+    this.editApellidos = e.apellidos;
+    this.editPuesto = e.puesto;
+    this.editDepartamento = e.departamento ?? '';
+    this.editEmail = e.email;
+    this.editTelefono = e.telefono;
+    this.editCoste = e.costeHoraEstandar;
+    this.editDias = e.diasVacacionesAnuales;
+  }
+  cancelEdit(): void { this.editingId.set(null); }
+  saveEdit(id: string): void {
+    this.savingEdit.set(true);
+    this.svc.updateEmpleado(id, {
+      nombre: this.editNombre,
+      apellidos: this.editApellidos,
+      puesto: this.editPuesto,
+      email: this.editEmail,
+      telefono: this.editTelefono,
+      departamento: this.editDepartamento || null,
+      costeHoraEstandar: this.editCoste,
+      diasVacacionesAnuales: this.editDias,
+    }).subscribe({
+      next: () => { this.savingEdit.set(false); this.editingId.set(null); this.load(); },
+      error: (err) => { this.savingEdit.set(false); this.error.set(err?.error?.message ?? 'Error al actualizar'); },
+    });
+  }
+  remove(e: EmpleadoListDto): void {
+    if (!confirm(`¿Eliminar empleado "${e.nombre} ${e.apellidos}"?`)) return;
+    this.svc.deleteEmpleado(e.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 
   ngOnInit(): void { this.load(); }
 

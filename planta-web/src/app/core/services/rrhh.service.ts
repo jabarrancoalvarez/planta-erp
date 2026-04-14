@@ -16,6 +16,10 @@ export interface EmpleadoListDto {
   puesto: string;
   departamento: string | null;
   activo: boolean;
+  email: string | null;
+  telefono: string | null;
+  costeHoraEstandar: number;
+  diasVacacionesAnuales: number;
 }
 
 export interface FichajeDto {
@@ -114,5 +118,31 @@ export class RrhhService {
 
   rechazarAusencia(id: string, userId: string): Observable<unknown> {
     return this.api.post<unknown>(`/rrhh/ausencias/${id}/rechazar`, { userId });
+  }
+
+  updateEmpleado(id: string, data: {
+    nombre: string; apellidos: string; puesto: string;
+    email: string | null; telefono: string | null; departamento: string | null;
+    costeHoraEstandar: number; diasVacacionesAnuales: number;
+  }): Observable<unknown> {
+    return this.api.put(`/rrhh/empleados/${id}`, data);
+  }
+
+  deleteEmpleado(id: string): Observable<unknown> {
+    return this.api.delete(`/rrhh/empleados/${id}`);
+  }
+
+  updateAusencia(id: string, data: {
+    tipo: TipoAusencia; fechaInicio: string; fechaFin: string; motivo: string | null;
+  }): Observable<unknown> {
+    return this.api.put(`/rrhh/ausencias/${id}`, data);
+  }
+
+  deleteAusencia(id: string): Observable<unknown> {
+    return this.api.delete(`/rrhh/ausencias/${id}`);
+  }
+
+  deleteFichaje(id: string): Observable<unknown> {
+    return this.api.delete(`/rrhh/fichajes/${id}`);
   }
 }

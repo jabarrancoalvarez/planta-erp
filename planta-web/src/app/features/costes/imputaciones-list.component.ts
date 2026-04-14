@@ -71,21 +71,42 @@ import { CostesService, ImputacionCosteDto, TipoCoste, OrigenImputacion } from '
                 <th style="text-align:right">Cantidad</th>
                 <th style="text-align:right">Precio</th>
                 <th style="text-align:right">Importe</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (i of items(); track i.id) {
-                <tr>
-                  <td>{{ i.fecha | date:'dd/MM/yyyy' }}</td>
-                  <td><span class="badge">{{ i.tipo }}</span></td>
-                  <td>{{ i.origen }}</td>
-                  <td>{{ i.concepto ?? '---' }}</td>
-                  <td style="text-align:right">{{ i.cantidad | number:'1.2-2' }}</td>
-                  <td style="text-align:right">{{ i.precioUnitario | number:'1.2-2' }} &euro;</td>
-                  <td style="text-align:right"><strong>{{ i.importe | number:'1.2-2' }} &euro;</strong></td>
-                </tr>
+                @if (editingId() === i.id) {
+                  <tr>
+                    <td><input type="date" [(ngModel)]="editFecha" /></td>
+                    <td>{{ i.tipo }}</td>
+                    <td>{{ i.origen }}</td>
+                    <td><input [(ngModel)]="editConcepto" /></td>
+                    <td><input type="number" step="0.01" [(ngModel)]="editCantidad" /></td>
+                    <td><input type="number" step="0.01" [(ngModel)]="editPrecio" /></td>
+                    <td style="text-align:right">---</td>
+                    <td>
+                      <button class="btn-primary btn-sm" (click)="saveEdit(i.id)" [disabled]="savingEdit()">Guardar</button>
+                      <button class="btn-outline btn-sm" (click)="cancelEdit()">Cancelar</button>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr>
+                    <td>{{ i.fecha | date:'dd/MM/yyyy' }}</td>
+                    <td><span class="badge">{{ i.tipo }}</span></td>
+                    <td>{{ i.origen }}</td>
+                    <td>{{ i.concepto ?? '---' }}</td>
+                    <td style="text-align:right">{{ i.cantidad | number:'1.2-2' }}</td>
+                    <td style="text-align:right">{{ i.precioUnitario | number:'1.2-2' }} &euro;</td>
+                    <td style="text-align:right"><strong>{{ i.importe | number:'1.2-2' }} &euro;</strong></td>
+                    <td>
+                      <button class="btn-outline btn-sm" (click)="startEdit(i)">Editar</button>
+                      <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(i)">Eliminar</button>
+                    </td>
+                  </tr>
+                }
               } @empty {
-                <tr><td colspan="7" class="empty-state">Sin imputaciones</td></tr>
+                <tr><td colspan="8" class="empty-state">Sin imputaciones</td></tr>
               }
             </tbody>
           </table>
@@ -113,6 +134,41 @@ export class ImputacionesListComponent implements OnInit {
   newPrecio = 0;
   newConcepto = '';
   newOfId = '';
+
+  readonly editingId = signal<string | null>(null);
+  readonly savingEdit = signal(false);
+  editCantidad = 0;
+  editPrecio = 0;
+  editConcepto = '';
+  editFecha = '';
+
+  startEdit(i: ImputacionCosteDto): void {
+    this.editingId.set(i.id);
+    this.editCantidad = i.cantidad;
+    this.editPrecio = i.precioUnitario;
+    this.editConcepto = i.concepto ?? '';
+    this.editFecha = new Date(i.fecha).toISOString().slice(0, 10);
+  }
+  cancelEdit(): void { this.editingId.set(null); }
+  saveEdit(id: string): void {
+    this.savingEdit.set(true);
+    this.svc.updateImputacion(id, {
+      cantidad: Number(this.editCantidad),
+      precioUnitario: Number(this.editPrecio),
+      concepto: this.editConcepto || null,
+      fecha: new Date(this.editFecha).toISOString(),
+    }).subscribe({
+      next: () => { this.savingEdit.set(false); this.editingId.set(null); this.load(); },
+      error: (err) => { this.savingEdit.set(false); this.error.set(err?.error?.message ?? 'Error al actualizar'); },
+    });
+  }
+  remove(i: ImputacionCosteDto): void {
+    if (!confirm(`¿Eliminar imputación de ${i.importe.toFixed(2)} €?`)) return;
+    this.svc.deleteImputacion(i.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
+  }
 
   ngOnInit(): void { this.load(); }
 

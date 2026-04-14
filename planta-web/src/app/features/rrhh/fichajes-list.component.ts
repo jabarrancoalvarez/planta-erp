@@ -59,6 +59,7 @@ import { RrhhService, FichajeDto, TipoFichaje, EmpleadoListDto } from '../../cor
                 <th>Tipo</th>
                 <th>Momento</th>
                 <th>Notas</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -68,9 +69,12 @@ import { RrhhService, FichajeDto, TipoFichaje, EmpleadoListDto } from '../../cor
                   <td><span class="badge">{{ f.tipo }}</span></td>
                   <td>{{ f.momento | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>{{ f.notas ?? '---' }}</td>
+                  <td>
+                    <button class="btn-outline btn-sm" style="background:#fee;color:#c00;" (click)="remove(f)">Eliminar</button>
+                  </td>
                 </tr>
               } @empty {
-                <tr><td colspan="4" class="empty-state">Sin fichajes</td></tr>
+                <tr><td colspan="5" class="empty-state">Sin fichajes</td></tr>
               }
             </tbody>
           </table>
@@ -116,6 +120,14 @@ export class FichajesListComponent implements OnInit {
   toggleCreate(): void {
     this.showCreate.update(v => !v);
     this.createError.set(null);
+  }
+
+  remove(f: FichajeDto): void {
+    if (!confirm(`¿Eliminar fichaje de "${f.empleadoNombre}"?`)) return;
+    this.svc.deleteFichaje(f.id).subscribe({
+      next: () => this.load(),
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al eliminar'),
+    });
   }
 
   save(): void {

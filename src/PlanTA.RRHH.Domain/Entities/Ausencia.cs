@@ -54,4 +54,18 @@ public class Ausencia : SoftDeletableEntity<AusenciaId>
         FechaAprobacion = DateTimeOffset.UtcNow;
         MarkUpdated();
     }
+
+    public Result<bool> Editar(TipoAusencia tipo, DateTimeOffset fechaInicio, DateTimeOffset fechaFin, string? motivo)
+    {
+        if (Estado is EstadoAusencia.Aprobada or EstadoAusencia.Rechazada or EstadoAusencia.Finalizada)
+            return Result<bool>.Failure(Error.Validation("Ausencia.EstadoTerminal", "No se puede editar una ausencia ya procesada"));
+        if (fechaFin < fechaInicio)
+            return Result<bool>.Failure(AusenciaErrors.FechasInvalidas);
+        Tipo = tipo;
+        FechaInicio = fechaInicio;
+        FechaFin = fechaFin;
+        Motivo = motivo;
+        MarkUpdated();
+        return Result<bool>.Success(true);
+    }
 }

@@ -34,7 +34,8 @@ public sealed class ListEmpleadosQueryHandler(
             .Take(request.PageSize)
             .Select(e => new EmpleadoListDto(
                 e.Id.Value, e.Codigo, e.Nombre, e.Apellidos, e.DNI,
-                e.Puesto, e.Departamento, e.FechaBaja == null))
+                e.Puesto, e.Departamento, e.FechaBaja == null,
+                e.Email, e.Telefono, e.CosteHoraEstandar, e.DiasVacacionesAnuales))
             .ToListAsync(ct);
 
         return Result<PagedResult<EmpleadoListDto>>.Success(

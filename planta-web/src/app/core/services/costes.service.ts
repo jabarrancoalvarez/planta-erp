@@ -48,4 +48,12 @@ export class CostesService {
   createImputacion(req: CreateImputacionRequest): Observable<string> {
     return this.api.post<string>('/costes/imputaciones', req);
   }
+
+  updateImputacion(id: string, data: { cantidad: number; precioUnitario: number; concepto: string | null; fecha: string }): Observable<unknown> {
+    return this.api.put(`/costes/imputaciones/${id}`, data);
+  }
+
+  deleteImputacion(id: string): Observable<unknown> {
+    return this.api.delete(`/costes/imputaciones/${id}`);
+  }
 }

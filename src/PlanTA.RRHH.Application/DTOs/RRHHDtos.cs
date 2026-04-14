@@ -4,7 +4,8 @@ namespace PlanTA.RRHH.Application.DTOs;
 
 public record EmpleadoListDto(
     Guid Id, string Codigo, string Nombre, string Apellidos, string DNI,
-    string Puesto, string? Departamento, bool Activo);
+    string Puesto, string? Departamento, bool Activo,
+    string? Email, string? Telefono, decimal CosteHoraEstandar, int DiasVacacionesAnuales);
 
 public record EmpleadoDto(
     Guid Id, string Codigo, string Nombre, string Apellidos, string DNI,

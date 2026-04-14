@@ -47,4 +47,20 @@ public class Empleado : SoftDeletableEntity<EmpleadoId>
 
     public void DarBaja(DateTimeOffset fecha) { FechaBaja = fecha; MarkUpdated(); }
     public void ActualizarCoste(decimal coste) { CosteHoraEstandar = coste; MarkUpdated(); }
+
+    public void Editar(
+        string nombre, string apellidos, string puesto,
+        string? email, string? telefono, string? departamento,
+        decimal costeHoraEstandar, int diasVacacionesAnuales)
+    {
+        Nombre = nombre.Trim();
+        Apellidos = apellidos.Trim();
+        Puesto = puesto;
+        Email = email;
+        Telefono = telefono;
+        Departamento = departamento;
+        CosteHoraEstandar = costeHoraEstandar;
+        DiasVacacionesAnuales = diasVacacionesAnuales;
+        MarkUpdated();
+    }
 }
