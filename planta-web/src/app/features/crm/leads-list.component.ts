@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrmService, LeadListDto, EstadoLead, OrigenLead } from '../../core/services/crm.service';
+import { ExportService } from '../../core/services/export.service';
 
 @Component({
   selector: 'app-leads-list',
@@ -12,7 +13,10 @@ import { CrmService, LeadListDto, EstadoLead, OrigenLead } from '../../core/serv
     <div class="list-page">
       <div class="list-page__header">
         <h1 class="list-page__title">Leads CRM</h1>
-        <button class="btn-primary" (click)="toggleCreate()">{{ showCreate() ? 'Cancelar' : '+ Nuevo lead' }}</button>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-outline" (click)="exportCsv()">Exportar CSV</button>
+          <button class="btn-primary" (click)="toggleCreate()">{{ showCreate() ? 'Cancelar' : '+ Nuevo lead' }}</button>
+        </div>
       </div>
 
       @if (showCreate()) {
@@ -116,6 +120,12 @@ import { CrmService, LeadListDto, EstadoLead, OrigenLead } from '../../core/serv
 })
 export class LeadsListComponent implements OnInit {
   private svc = inject(CrmService);
+  private exportSvc = inject(ExportService);
+
+  exportCsv(): void {
+    const rows = this.items().map(l => [l.nombre, (l as any).empresa ?? '', (l as any).email ?? '', (l as any).telefono ?? '', l.origen, l.estado]);
+    this.exportSvc.exportToCsv('leads', ['Nombre', 'Empresa', 'Email', 'Telefono', 'Origen', 'Estado'], rows);
+  }
 
   readonly items = signal<LeadListDto[]>([]);
   readonly loading = signal(false);

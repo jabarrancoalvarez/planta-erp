@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { VentasService, ClienteListDto } from '../../../core/services/ventas.service';
+import { ExportService } from '../../../core/services/export.service';
 import { NotificationService } from '../../../shared/components/toast/notification.service';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
@@ -18,7 +19,10 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
           <h1 class="page__title">Clientes</h1>
           <p class="page__subtitle">Gestion de clientes y condiciones de venta</p>
         </div>
-        <button class="btn-primary" (click)="showForm.set(true)">+ Nuevo Cliente</button>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-outline" (click)="exportCsv()">Exportar CSV</button>
+          <button class="btn-primary" (click)="showForm.set(true)">+ Nuevo Cliente</button>
+        </div>
       </div>
 
       <div class="page__filters">
@@ -137,6 +141,7 @@ export class ClientesListComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private notify = inject(NotificationService);
+  private exportSvc = inject(ExportService);
 
   readonly items = signal<ClienteListDto[]>([]);
   readonly totalCount = signal(0);
@@ -171,6 +176,11 @@ export class ClientesListComponent implements OnInit {
   }
 
   onPageChange(page: number): void { this.currentPage.set(page); this.load(); }
+
+  exportCsv(): void {
+    const rows = this.items().map(c => [c.nif, c.razonSocial, c.ciudad ?? '', c.email, c.activo ? 'Activo' : 'Inactivo']);
+    this.exportSvc.exportToCsv('clientes', ['NIF', 'Razon Social', 'Ciudad', 'Email', 'Estado'], rows);
+  }
   goToDetail(id: string): void { this.router.navigate(['/app/ventas/clientes', id]); }
   closeForm(): void { this.showForm.set(false); this.form.reset(); }
 

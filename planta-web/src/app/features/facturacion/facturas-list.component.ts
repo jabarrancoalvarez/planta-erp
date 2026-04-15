@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FacturacionService, FacturaListDto, EstadoFactura } from '../../core/services/facturacion.service';
 import { VentasService } from '../../core/services/ventas.service';
+import { ExportService } from '../../core/services/export.service';
 
 @Component({
   selector: 'app-facturas-list',
@@ -14,7 +15,10 @@ import { VentasService } from '../../core/services/ventas.service';
     <div class="list-page">
       <div class="list-page__header">
         <h1 class="list-page__title">Facturas</h1>
-        <button class="btn-primary" (click)="toggleCreate()">{{ showCreate() ? 'Cancelar' : '+ Nueva factura' }}</button>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-outline" (click)="exportCsv()">Exportar CSV</button>
+          <button class="btn-primary" (click)="toggleCreate()">{{ showCreate() ? 'Cancelar' : '+ Nueva factura' }}</button>
+        </div>
       </div>
 
       @if (showCreate()) {
@@ -116,6 +120,7 @@ export class FacturasListComponent implements OnInit {
   private svc = inject(FacturacionService);
   private ventas = inject(VentasService);
   private router = inject(Router);
+  private exportSvc = inject(ExportService);
 
   readonly items = signal<FacturaListDto[]>([]);
   readonly loading = signal(false);
@@ -195,6 +200,11 @@ export class FacturasListComponent implements OnInit {
 
   verifactu(f: FacturaListDto): void {
     this.svc.enviarVerifactu(f.id).subscribe({ next: () => this.load(), error: (e) => this.error.set(e?.error?.message ?? 'Error verifactu') });
+  }
+
+  exportCsv(): void {
+    const rows = this.items().map(f => [f.numeroCompleto, f.clienteNombre, f.fechaEmision, f.total, f.estado, f.estadoVerifactu]);
+    this.exportSvc.exportToCsv('facturas', ['Numero', 'Cliente', 'Fecha', 'Total EUR', 'Estado', 'Verifactu'], rows);
   }
 
   remove(f: FacturaListDto): void {

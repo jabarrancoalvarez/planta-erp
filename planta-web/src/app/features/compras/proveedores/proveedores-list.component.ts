@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ComprasService, ProveedorListDto } from '../../../core/services/compras.service';
+import { ExportService } from '../../../core/services/export.service';
 import { NotificationService } from '../../../shared/components/toast/notification.service';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
@@ -18,7 +19,10 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
           <h1 class="page__title">Proveedores</h1>
           <p class="page__subtitle">Gestion de proveedores y condiciones de compra</p>
         </div>
-        <button class="btn-primary" (click)="showForm.set(true)">+ Nuevo Proveedor</button>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-outline" (click)="exportCsv()">Exportar CSV</button>
+          <button class="btn-primary" (click)="showForm.set(true)">+ Nuevo Proveedor</button>
+        </div>
       </div>
 
       <div class="page__filters">
@@ -151,6 +155,12 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 export class ProveedoresListComponent implements OnInit {
   private svc = inject(ComprasService);
   private router = inject(Router);
+  private exportSvc = inject(ExportService);
+
+  exportCsv(): void {
+    const rows = this.items().map(p => [p.nif, p.razonSocial, p.ciudad ?? '', p.email, p.activo ? 'Activo' : 'Inactivo']);
+    this.exportSvc.exportToCsv('proveedores', ['NIF', 'Razon Social', 'Ciudad', 'Email', 'Estado'], rows);
+  }
   private fb = inject(FormBuilder);
   private notify = inject(NotificationService);
 

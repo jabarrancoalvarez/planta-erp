@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RrhhService, EmpleadoListDto } from '../../core/services/rrhh.service';
+import { ExportService } from '../../core/services/export.service';
 
 @Component({
   selector: 'app-empleados-list',
@@ -12,7 +13,10 @@ import { RrhhService, EmpleadoListDto } from '../../core/services/rrhh.service';
     <div class="list-page">
       <div class="list-page__header">
         <h1 class="list-page__title">Empleados</h1>
-        <button class="btn-primary" (click)="toggleCreate()">{{ showCreate() ? 'Cancelar' : '+ Nuevo empleado' }}</button>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-outline" (click)="exportCsv()">Exportar CSV</button>
+          <button class="btn-primary" (click)="toggleCreate()">{{ showCreate() ? 'Cancelar' : '+ Nuevo empleado' }}</button>
+        </div>
       </div>
 
       @if (showCreate()) {
@@ -126,6 +130,12 @@ import { RrhhService, EmpleadoListDto } from '../../core/services/rrhh.service';
 })
 export class EmpleadosListComponent implements OnInit {
   private svc = inject(RrhhService);
+  private exportSvc = inject(ExportService);
+
+  exportCsv(): void {
+    const rows = this.items().map(e => [e.codigo, e.nombre, e.apellidos, e.dni, e.puesto, e.departamento ?? '', e.activo ? 'Si' : 'No']);
+    this.exportSvc.exportToCsv('empleados', ['Codigo', 'Nombre', 'Apellidos', 'DNI', 'Puesto', 'Departamento', 'Activo'], rows);
+  }
 
   readonly items = signal<EmpleadoListDto[]>([]);
   readonly loading = signal(false);
