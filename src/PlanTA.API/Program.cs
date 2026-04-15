@@ -43,6 +43,9 @@ using PlanTA.Ventas.Infrastructure;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -136,6 +139,7 @@ builder.Services.AddDbContext<AuditDbContext>(options =>
 
 builder.Services.AddScoped<IAuditStore, AuditStore>();
 builder.Services.AddScoped<PlanTA.API.Services.EmpresaDemoSeeder>();
+builder.Services.AddSingleton<PlanTA.API.Services.FacturaPdfService>();
 
 // -- Modulo Seguridad (Identity + JWT) --
 builder.Services.AddSeguridadInfrastructure(builder.Configuration);

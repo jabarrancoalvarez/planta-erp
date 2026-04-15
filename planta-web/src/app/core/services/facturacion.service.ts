@@ -110,4 +110,8 @@ export class FacturacionService {
   deleteFactura(id: string): Observable<unknown> {
     return this.api.delete(`/facturacion/facturas/${id}`);
   }
+
+  descargarPdf(id: string): Observable<Blob> {
+    return this.api.getBlob(`/facturacion/facturas/${id}/pdf`);
+  }
 }

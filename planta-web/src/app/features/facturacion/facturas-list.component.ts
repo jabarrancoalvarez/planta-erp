@@ -104,6 +104,9 @@ import { ExportService } from '../../core/services/export.service';
                     @if (f.estado === 'Emitida' || f.estado === 'Firmada') {
                       <button class="btn-sm" (click)="verifactu(f)">Verifactu</button>
                     }
+                    @if (f.estado !== 'Borrador') {
+                      <button class="btn-outline btn-sm" (click)="descargarPdf(f)">PDF</button>
+                    }
                   </td>
                 </tr>
               } @empty {
@@ -205,6 +208,22 @@ export class FacturasListComponent implements OnInit {
   exportCsv(): void {
     const rows = this.items().map(f => [f.numeroCompleto, f.clienteNombre, f.fechaEmision, f.total, f.estado, f.estadoVerifactu]);
     this.exportSvc.exportToCsv('facturas', ['Numero', 'Cliente', 'Fecha', 'Total EUR', 'Estado', 'Verifactu'], rows);
+  }
+
+  descargarPdf(f: FacturaListDto): void {
+    this.svc.descargarPdf(f.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${f.numeroCompleto.replace(/\//g, '-')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      error: (err) => this.error.set(err?.error?.message ?? 'Error al generar PDF'),
+    });
   }
 
   remove(f: FacturaListDto): void {
