@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PlanTA.API.Services;
 using PlanTA.Facturacion.Application.Features.Facturas.CreateFactura;
 using PlanTA.Facturacion.Application.Features.Facturas.GetFactura;
+using PlanTA.Seguridad.Domain.Entities;
 using PlanTA.Seguridad.Infrastructure.Data;
 using PlanTA.SharedKernel;
 using PlanTA.Facturacion.Application.Features.Facturas.DeleteFactura;
@@ -43,8 +44,9 @@ public sealed class FacturacionEndpoints : IEndpointGroup
                 if (!result.IsSuccess || result.Value is null)
                     return Results.NotFound(result);
 
+                var empresaId = new EmpresaId(tenant.EmpresaId);
                 var empresa = await seguridad.Empresas.AsNoTracking()
-                    .Where(e => e.Id.Value == tenant.EmpresaId)
+                    .Where(e => e.Id == empresaId)
                     .Select(e => new { e.Nombre, e.CIF })
                     .FirstOrDefaultAsync(ct);
 
