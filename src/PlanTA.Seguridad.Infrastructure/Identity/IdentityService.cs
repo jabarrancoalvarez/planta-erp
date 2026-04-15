@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PlanTA.Seguridad.Application.DTOs;
 using PlanTA.Seguridad.Application.Interfaces;
+using PlanTA.Seguridad.Domain.Entities;
 using PlanTA.Seguridad.Infrastructure.Data;
 using PlanTA.SharedKernel;
 
@@ -38,6 +39,42 @@ public sealed class IdentityService(
 
         await userManager.AddToRoleAsync(user, rol);
         return Result<Guid>.Success(user.Id);
+    }
+
+    public async Task<Result<TokenPairDto>> RegisterEmpresaAsync(
+        string nombreEmpresa, string? cif, string email, string password, string nombreAdmin)
+    {
+        const int TrialDias = 14;
+        const string RolAdmin = "Administrador";
+
+        var existente = await userManager.FindByEmailAsync(email);
+        if (existente is not null)
+            return Result<TokenPairDto>.Failure(
+                Error.Conflict("Registro.EmailEnUso", "Ya existe una cuenta con ese email"));
+
+        var empresa = Empresa.Crear(nombreEmpresa, cif, email, TrialDias);
+        db.Empresas.Add(empresa);
+        await db.SaveChangesAsync();
+
+        var user = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            Nombre = nombreAdmin,
+            EmpresaId = empresa.Id.Value
+        };
+
+        var createResult = await userManager.CreateAsync(user, password);
+        if (!createResult.Succeeded)
+        {
+            db.Empresas.Remove(empresa);
+            await db.SaveChangesAsync();
+            var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+            return Result<TokenPairDto>.Failure(Error.Validation("Registro.UsuarioInvalido", errors));
+        }
+
+        await userManager.AddToRoleAsync(user, RolAdmin);
+        return await LoginAsync(email, password);
     }
 
     public async Task<Result<TokenPairDto>> LoginAsync(string email, string password)

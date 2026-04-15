@@ -223,6 +223,16 @@ using (var scope = app.Services.CreateScope())
     var segDb = scope.ServiceProvider.GetRequiredService<SeguridadDbContext>();
     await EnsureTablesAsync(segDb);
 
+    // Ensure new Empresa columns exist (TrialHasta, OnboardingCompletado)
+    try
+    {
+        await segDb.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE seguridad.\"Empresas\" ADD COLUMN IF NOT EXISTS \"TrialHasta\" timestamp with time zone NULL");
+        await segDb.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE seguridad.\"Empresas\" ADD COLUMN IF NOT EXISTS \"OnboardingCompletado\" boolean NOT NULL DEFAULT false");
+    }
+    catch { }
+
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<InventarioDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ProduccionDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ComprasDbContext>());

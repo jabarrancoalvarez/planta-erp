@@ -16,16 +16,26 @@ public class Empresa : SoftDeletableEntity<EmpresaId>
     public string? LogoUrl { get; private set; }
     public string ZonaHoraria { get; private set; } = "Europe/Madrid";
     public string Moneda { get; private set; } = "EUR";
+    public DateTimeOffset? TrialHasta { get; private set; }
+    public bool OnboardingCompletado { get; private set; }
 
-    public static Empresa Crear(string nombre, string? cif = null, string? email = null)
+    public static Empresa Crear(string nombre, string? cif = null, string? email = null, int? trialDias = null)
     {
         return new Empresa
         {
             Id = new EmpresaId(Guid.NewGuid()),
             Nombre = nombre,
             CIF = cif,
-            Email = email
+            Email = email,
+            TrialHasta = trialDias.HasValue ? DateTimeOffset.UtcNow.AddDays(trialDias.Value) : null,
+            OnboardingCompletado = false
         };
+    }
+
+    public void CompletarOnboarding()
+    {
+        OnboardingCompletado = true;
+        MarkUpdated();
     }
 
     public void ActualizarDatos(string nombre, string? cif, string? direccion, string? telefono, string? email)
