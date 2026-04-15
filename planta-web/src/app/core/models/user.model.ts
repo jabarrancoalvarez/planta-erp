@@ -7,6 +7,7 @@ export interface User {
   avatar?: string;
   onboardingCompletado?: boolean;
   trialHasta?: string | null;
+  modulosDeshabilitados?: string[];
 }
 
 export interface AuthResponse {

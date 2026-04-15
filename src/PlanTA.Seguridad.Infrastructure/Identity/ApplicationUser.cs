@@ -9,4 +9,5 @@ public class ApplicationUser : IdentityUser<Guid>
     public string? RefreshToken { get; set; }
     public DateTimeOffset? RefreshTokenExpiryTime { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public string? ModulosDeshabilitados { get; set; }
 }

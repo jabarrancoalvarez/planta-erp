@@ -133,6 +133,11 @@ export const routes: Routes = [
           import('./features/auditoria/auditoria-list.component').then(m => m.AuditoriaListComponent),
       },
       {
+        path: 'permisos',
+        loadComponent: () =>
+          import('./features/permisos/permisos-list.component').then(m => m.PermisosListComponent),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./pages/app/settings-page/settings-page.component').then(

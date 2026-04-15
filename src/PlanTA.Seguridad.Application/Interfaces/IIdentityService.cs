@@ -11,4 +11,6 @@ public interface IIdentityService
     Task<Result<TokenPairDto>> RefreshAsync(string refreshToken);
     Task<Result<bool>> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
     Task<Result<UserDto>> GetUserByIdAsync(Guid userId);
+    Task<Result<List<UserDto>>> ListUsersByEmpresaAsync(Guid empresaId);
+    Task<Result<bool>> UpdateModulosDeshabilitadosAsync(Guid userId, string[] modulos);
 }

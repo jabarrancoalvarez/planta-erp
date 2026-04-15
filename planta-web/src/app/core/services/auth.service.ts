@@ -17,6 +17,7 @@ interface BackendUserDto {
   empresaNombre?: string;
   onboardingCompletado?: boolean;
   trialHasta?: string | null;
+  modulosDeshabilitados?: string[];
   name?: string;
   role?: string;
   company?: string;
@@ -38,6 +39,7 @@ function mapUser(dto: BackendUserDto): User {
     company: dto.empresaNombre ?? dto.company ?? '',
     onboardingCompletado: dto.onboardingCompletado ?? false,
     trialHasta: dto.trialHasta ?? null,
+    modulosDeshabilitados: dto.modulosDeshabilitados ?? [],
   };
 }
 

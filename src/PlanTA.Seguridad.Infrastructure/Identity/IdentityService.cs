@@ -98,9 +98,12 @@ public sealed class IdentityService(
             configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays", 7));
         await userManager.UpdateAsync(user);
 
+        var modulos = string.IsNullOrWhiteSpace(user.ModulosDeshabilitados)
+            ? Array.Empty<string>()
+            : user.ModulosDeshabilitados.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var userDto = new UserDto(user.Id, user.Email!, user.Nombre, rol,
             user.EmpresaId, empresa?.Nombre ?? "",
-            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta);
+            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta, modulos);
 
         return Result<TokenPairDto>.Success(new TokenPairDto(accessToken, refreshToken, userDto));
     }
@@ -125,9 +128,12 @@ public sealed class IdentityService(
             configuration.GetValue<int>("Jwt:RefreshTokenExpirationDays", 7));
         await userManager.UpdateAsync(user);
 
+        var modulos = string.IsNullOrWhiteSpace(user.ModulosDeshabilitados)
+            ? Array.Empty<string>()
+            : user.ModulosDeshabilitados.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var userDto = new UserDto(user.Id, user.Email!, user.Nombre, rol,
             user.EmpresaId, empresa?.Nombre ?? "",
-            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta);
+            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta, modulos);
 
         return Result<TokenPairDto>.Success(new TokenPairDto(newAccessToken, newRefreshToken, userDto));
     }
@@ -156,9 +162,42 @@ public sealed class IdentityService(
         var empresaId = new PlanTA.Seguridad.Domain.Entities.EmpresaId(user.EmpresaId);
         var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id == empresaId);
 
+        var modulosGbi = string.IsNullOrWhiteSpace(user.ModulosDeshabilitados)
+            ? Array.Empty<string>()
+            : user.ModulosDeshabilitados.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         return Result<UserDto>.Success(new UserDto(
             user.Id, user.Email!, user.Nombre, rol, user.EmpresaId, empresa?.Nombre ?? "",
-            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta));
+            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta, modulosGbi));
+    }
+
+    public async Task<Result<List<UserDto>>> ListUsersByEmpresaAsync(Guid empresaId)
+    {
+        var users = await db.Users.Where(u => u.EmpresaId == empresaId).ToListAsync();
+        var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id == new PlanTA.Seguridad.Domain.Entities.EmpresaId(empresaId));
+        var list = new List<UserDto>();
+        foreach (var u in users)
+        {
+            var roles = await userManager.GetRolesAsync(u);
+            var rol = roles.FirstOrDefault() ?? "Operario";
+            var modulos = string.IsNullOrWhiteSpace(u.ModulosDeshabilitados)
+                ? Array.Empty<string>()
+                : u.ModulosDeshabilitados.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            list.Add(new UserDto(u.Id, u.Email!, u.Nombre, rol, u.EmpresaId, empresa?.Nombre ?? "",
+                empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta, modulos));
+        }
+        return Result<List<UserDto>>.Success(list);
+    }
+
+    public async Task<Result<bool>> UpdateModulosDeshabilitadosAsync(Guid userId, string[] modulos)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+            return Result<bool>.Failure(Error.NotFound("User.NotFound", "Usuario no encontrado"));
+        user.ModulosDeshabilitados = modulos is null || modulos.Length == 0
+            ? null
+            : string.Join(",", modulos);
+        await userManager.UpdateAsync(user);
+        return Result<bool>.Success(true);
     }
 
     private string GenerateAccessToken(ApplicationUser user, string role)

@@ -231,6 +231,8 @@ using (var scope = app.Services.CreateScope())
             "ALTER TABLE seguridad.\"Empresas\" ADD COLUMN IF NOT EXISTS \"TrialHasta\" timestamp with time zone NULL");
         await segDb.Database.ExecuteSqlRawAsync(
             "ALTER TABLE seguridad.\"Empresas\" ADD COLUMN IF NOT EXISTS \"OnboardingCompletado\" boolean NOT NULL DEFAULT false");
+        await segDb.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE seguridad.\"AspNetUsers\" ADD COLUMN IF NOT EXISTS \"ModulosDeshabilitados\" text NULL");
     }
     catch { }
 
@@ -318,6 +320,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
+
+app.Use(async (ctx, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    ctx.Response.OnStarting(() =>
+    {
+        sw.Stop();
+        ctx.Response.Headers["X-Response-Time-ms"] = sw.ElapsedMilliseconds.ToString();
+        return Task.CompletedTask;
+    });
+    await next();
+});
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

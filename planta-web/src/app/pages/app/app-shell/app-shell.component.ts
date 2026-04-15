@@ -58,15 +58,22 @@ export class AppShellComponent {
     { label: 'OEE', icon: 'activity', route: '/app/oee', roles: ['Administrador', 'GerentePlanta', 'JefeProduccion'] },
     { label: 'Importador', icon: 'upload', route: '/app/importador', roles: ['Administrador'] },
     { label: 'Auditoría', icon: 'shield', route: '/app/auditoria', roles: ['Administrador', 'GerentePlanta'] },
+    { label: 'Permisos', icon: 'lock', route: '/app/permisos', roles: ['Administrador'] },
     { label: 'Asistente IA', icon: 'message-square', route: '/app/ia', roles: ALL_ROLES },
     { label: 'Movil', icon: 'smartphone', route: '/app/movil', roles: ['Administrador', 'Operario'] },
     { label: 'Configuracion', icon: 'settings', route: '/app/settings', roles: ALL_ROLES },
   ];
 
   readonly navItems = computed(() => {
-    const role = this.auth.currentUser()?.role;
+    const u = this.auth.currentUser();
+    const role = u?.role;
     if (!role) return [];
-    return this.allNavItems.filter(item => !item.roles || item.roles.includes(role));
+    const disabled = new Set((u?.modulosDeshabilitados ?? []).map(m => m.toLowerCase()));
+    return this.allNavItems.filter(item => {
+      if (item.roles && !item.roles.includes(role)) return false;
+      const key = item.route.split('/').pop() ?? '';
+      return !disabled.has(key.toLowerCase());
+    });
   });
 
   toggleSidebar(): void {

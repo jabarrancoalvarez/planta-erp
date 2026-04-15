@@ -10,4 +10,5 @@ public record UserDto(
     Guid EmpresaId,
     string EmpresaNombre,
     bool OnboardingCompletado = false,
-    DateTimeOffset? TrialHasta = null);
+    DateTimeOffset? TrialHasta = null,
+    string[]? ModulosDeshabilitados = null);
