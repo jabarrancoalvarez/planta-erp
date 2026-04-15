@@ -208,6 +208,15 @@
       </div>
     </header>
 
+    @if (trialInfo(); as trial) {
+      <div class="trial-banner" [class.trial-banner--expired]="trial.expirado">
+        <span>⏱ {{ trial.texto }}</span>
+        @if (!trial.expirado) {
+          <a routerLink="/app/settings">Gestionar suscripción</a>
+        }
+      </div>
+    }
+
     <!-- Page content -->
     <main class="shell__content" id="main-content" role="main">
       <router-outlet></router-outlet>

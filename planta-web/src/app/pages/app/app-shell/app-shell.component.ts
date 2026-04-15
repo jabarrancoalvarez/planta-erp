@@ -28,6 +28,16 @@ export class AppShellComponent {
   firstName(): string {
     return this.auth.currentUser()?.name?.split(' ')[0] ?? '';
   }
+
+  readonly trialInfo = computed(() => {
+    const u = this.auth.currentUser();
+    if (!u?.trialHasta) return null;
+    const hasta = new Date(u.trialHasta);
+    const dias = Math.ceil((hasta.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (dias < 0) return { expirado: true, dias: 0, texto: 'Trial expirado — suscríbete para seguir usando PlanTA' };
+    if (dias === 0) return { expirado: false, dias, texto: 'Último día de trial' };
+    return { expirado: false, dias, texto: `Trial: ${dias} día${dias === 1 ? '' : 's'} restante${dias === 1 ? '' : 's'}` };
+  });
   mobileSidebarOpen = signal(false);
   userMenuOpen = signal(false);
 

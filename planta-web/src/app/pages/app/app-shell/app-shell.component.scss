@@ -543,3 +543,29 @@ $topbar-height: 60px;
     }
   }
 }
+
+.trial-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.88rem;
+  font-weight: 500;
+  border-bottom: 1px solid #fcd34d;
+
+  a {
+    color: #92400e;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+
+  &--expired {
+    background: #fee2e2;
+    color: #991b1b;
+    border-bottom-color: #fca5a5;
+    a { color: #991b1b; }
+  }
+}
