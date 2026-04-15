@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { onboardingGuard } from './core/guards/onboarding.guard';
 
 export const routes: Routes = [
   {
@@ -33,8 +34,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/app/app-shell/app-shell.component').then(m => m.AppShellComponent),
     canActivate: [authGuard],
+    canActivateChild: [onboardingGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'onboarding',
+        loadComponent: () =>
+          import('./pages/app/onboarding/onboarding.component').then(m => m.OnboardingComponent),
+      },
       {
         path: 'dashboard',
         loadComponent: () =>

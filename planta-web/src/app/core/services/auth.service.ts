@@ -15,6 +15,8 @@ interface BackendUserDto {
   rol?: string;
   empresaId?: string;
   empresaNombre?: string;
+  onboardingCompletado?: boolean;
+  trialHasta?: string | null;
   name?: string;
   role?: string;
   company?: string;
@@ -34,6 +36,8 @@ function mapUser(dto: BackendUserDto): User {
     name: dto.nombre ?? dto.name ?? dto.email ?? '',
     role: (dto.rol ?? dto.role ?? 'Operario') as User['role'],
     company: dto.empresaNombre ?? dto.company ?? '',
+    onboardingCompletado: dto.onboardingCompletado ?? false,
+    trialHasta: dto.trialHasta ?? null,
   };
 }
 
@@ -145,6 +149,24 @@ export class AuthService {
 
   clearError(): void {
     this._error.set(null);
+  }
+
+  async completarOnboarding(): Promise<boolean> {
+    try {
+      await firstValueFrom(
+        this.http.post(`${this.apiUrl}/seguridad/empresa/completar-onboarding`, {})
+      );
+      const user = this._currentUser();
+      if (user) {
+        const updated = { ...user, onboardingCompletado: true };
+        localStorage.setItem(USER_KEY, JSON.stringify(updated));
+        this._currentUser.set(updated);
+      }
+      return true;
+    } catch (err: any) {
+      this._error.set(err?.error?.message ?? 'Error al completar onboarding');
+      return false;
+    }
   }
 
   private persistSession(token: string, user: User): void {

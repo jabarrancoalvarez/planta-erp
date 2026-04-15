@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using PlanTA.Seguridad.Application.Interfaces;
 using PlanTA.Seguridad.Infrastructure.Data;
 using PlanTA.Seguridad.Infrastructure.Identity;
+using PlanTA.Seguridad.Infrastructure.Services;
 using PlanTA.SharedKernel;
 
 namespace PlanTA.Seguridad.Infrastructure;
@@ -64,6 +65,7 @@ public static class DependencyInjection
         // ── Services ──
         services.AddHttpContextAccessor();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IEmpresaService, EmpresaService>();
         services.AddScoped<ICurrentTenant, CurrentTenant>();
 
         return services;

@@ -8,4 +8,6 @@ public record UserDto(
     string Nombre,
     string Rol,
     Guid EmpresaId,
-    string EmpresaNombre);
+    string EmpresaNombre,
+    bool OnboardingCompletado = false,
+    DateTimeOffset? TrialHasta = null);

@@ -5,6 +5,8 @@ export interface User {
   role: 'Administrador' | 'GerentePlanta' | 'JefeAlmacen' | 'JefeProduccion' | 'Compras' | 'Ventas' | 'Operario' | 'Calidad';
   company: string;
   avatar?: string;
+  onboardingCompletado?: boolean;
+  trialHasta?: string | null;
 }
 
 export interface AuthResponse {

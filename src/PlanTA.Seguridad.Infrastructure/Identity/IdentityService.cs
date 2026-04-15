@@ -99,7 +99,8 @@ public sealed class IdentityService(
         await userManager.UpdateAsync(user);
 
         var userDto = new UserDto(user.Id, user.Email!, user.Nombre, rol,
-            user.EmpresaId, empresa?.Nombre ?? "");
+            user.EmpresaId, empresa?.Nombre ?? "",
+            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta);
 
         return Result<TokenPairDto>.Success(new TokenPairDto(accessToken, refreshToken, userDto));
     }
@@ -125,7 +126,8 @@ public sealed class IdentityService(
         await userManager.UpdateAsync(user);
 
         var userDto = new UserDto(user.Id, user.Email!, user.Nombre, rol,
-            user.EmpresaId, empresa?.Nombre ?? "");
+            user.EmpresaId, empresa?.Nombre ?? "",
+            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta);
 
         return Result<TokenPairDto>.Success(new TokenPairDto(newAccessToken, newRefreshToken, userDto));
     }
@@ -155,7 +157,8 @@ public sealed class IdentityService(
         var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.Id == empresaId);
 
         return Result<UserDto>.Success(new UserDto(
-            user.Id, user.Email!, user.Nombre, rol, user.EmpresaId, empresa?.Nombre ?? ""));
+            user.Id, user.Email!, user.Nombre, rol, user.EmpresaId, empresa?.Nombre ?? "",
+            empresa?.OnboardingCompletado ?? false, empresa?.TrialHasta));
     }
 
     private string GenerateAccessToken(ApplicationUser user, string role)
