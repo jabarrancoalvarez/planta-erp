@@ -254,12 +254,25 @@ using (var scope = app.Services.CreateScope())
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<InventarioDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ProduccionDbContext>());
 
-    // Reset legacy Compras schema (Proveedor owned-type refactor broke column mapping)
+    // Reset legacy Compras schema solo si proveedores existe pero le falta la columna
+    // DescuentoProntoPago (refactor CondicionesPago owned-type).
     try
     {
         var comprasReset = scope.ServiceProvider.GetRequiredService<ComprasDbContext>();
-        await comprasReset.Database.ExecuteSqlRawAsync(
-            "DROP TABLE IF EXISTS compras.\"proveedores\" CASCADE");
+        await comprasReset.Database.ExecuteSqlRawAsync(@"
+            DO $$
+            BEGIN
+              IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='compras' AND table_name='proveedores')
+                 AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='compras' AND table_name='proveedores' AND column_name='DescuentoProntoPago') THEN
+                DROP TABLE IF EXISTS compras.""lineas_recepcion"" CASCADE;
+                DROP TABLE IF EXISTS compras.""recepciones"" CASCADE;
+                DROP TABLE IF EXISTS compras.""lineas_orden_compra"" CASCADE;
+                DROP TABLE IF EXISTS compras.""ordenes_compra"" CASCADE;
+                DROP TABLE IF EXISTS compras.""contactos_proveedor"" CASCADE;
+                DROP TABLE IF EXISTS compras.""proveedores"" CASCADE;
+              END IF;
+            END $$;
+        ");
     }
     catch { }
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ComprasDbContext>());
