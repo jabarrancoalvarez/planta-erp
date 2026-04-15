@@ -92,6 +92,26 @@
             </div>
             <button class="btn-outline-sm btn-outline-sm--danger" type="button">Cerrar todas las sesiones</button>
           </div>
+
+          <div class="danger-zone">
+            <div>
+              <p class="danger-zone__title">Exportar mis datos (RGPD)</p>
+              <p class="danger-zone__desc">Descarga un ZIP con tus datos personales y los de tu empresa</p>
+            </div>
+            <button class="btn-outline-sm" type="button" [disabled]="gdprLoading()" (click)="exportarDatos()">
+              {{ gdprLoading() ? 'Generando…' : 'Exportar ZIP' }}
+            </button>
+          </div>
+
+          <div class="danger-zone">
+            <div>
+              <p class="danger-zone__title">Eliminar mi cuenta</p>
+              <p class="danger-zone__desc">Elimina tu cuenta y todos tus datos. Esta acción no se puede deshacer.</p>
+            </div>
+            <button class="btn-outline-sm btn-outline-sm--danger" type="button" [disabled]="gdprLoading()" (click)="eliminarCuenta()">
+              Eliminar cuenta
+            </button>
+          </div>
         </div>
       }
 

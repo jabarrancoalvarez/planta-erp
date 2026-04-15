@@ -1,7 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ApiService } from '../../../core/services/api.service';
 
 @Component({
   selector: 'app-settings-page',
@@ -46,5 +48,48 @@ export class SettingsPageComponent {
   onSave(): void {
     this.saveSuccess.set(true);
     setTimeout(() => this.saveSuccess.set(false), 3000);
+  }
+
+  private api = inject(ApiService);
+  private router = inject(Router);
+  readonly gdprLoading = signal(false);
+
+  exportarDatos(): void {
+    this.gdprLoading.set(true);
+    this.api.getBlob('/gdpr/export').subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `planta-export-${new Date().toISOString().slice(0, 10)}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this.gdprLoading.set(false);
+      },
+      error: () => {
+        this.gdprLoading.set(false);
+        alert('Error al exportar datos');
+      },
+    });
+  }
+
+  eliminarCuenta(): void {
+    const confirmText = 'ELIMINAR';
+    const input = prompt(`Esta acción eliminará tu cuenta permanentemente.\n\nEscribe "${confirmText}" para confirmar:`);
+    if (input !== confirmText) return;
+    this.gdprLoading.set(true);
+    this.api.delete('/gdpr/account').subscribe({
+      next: () => {
+        this.gdprLoading.set(false);
+        this.auth.logout();
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.gdprLoading.set(false);
+        alert('Error al eliminar cuenta');
+      },
+    });
   }
 }
