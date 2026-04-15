@@ -1,4 +1,7 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using PlanTA.RRHH.Application.Interfaces;
+using PlanTA.SharedKernel;
 using PlanTA.RRHH.Application.Features.Ausencias.AprobarAusencia;
 using PlanTA.RRHH.Application.Features.Ausencias.CreateAusencia;
 using PlanTA.RRHH.Application.Features.Ausencias.DeleteAusencia;
@@ -59,6 +62,28 @@ public sealed class RRHHEndpoints : IEndpointGroup
             return result.ToHttpResult(201);
         }).WithName("RegistrarFichaje").WithTags("RRHH");
 
+        group.MapGet("/empleados/me", async (IRRHHDbContext db, ICurrentTenant tenant, CancellationToken ct) =>
+        {
+            var empleado = await db.Empleados.AsNoTracking()
+                .Where(e => e.UserId == tenant.UserId)
+                .Select(e => new { id = e.Id.Value, nombre = e.Nombre, apellidos = e.Apellidos, email = e.Email, puesto = e.Puesto })
+                .FirstOrDefaultAsync(ct);
+            return empleado is null ? Results.NotFound() : Results.Ok(empleado);
+        }).WithName("GetEmpleadoMe").WithTags("RRHH");
+
+        group.MapPost("/fichajes/me", async (FichajeMeRequest req, IRRHHDbContext db, IMediator m, ICurrentTenant tenant, CancellationToken ct) =>
+        {
+            var empleadoId = await db.Empleados.AsNoTracking()
+                .Where(e => e.UserId == tenant.UserId)
+                .Select(e => e.Id.Value)
+                .FirstOrDefaultAsync(ct);
+            if (empleadoId == Guid.Empty)
+                return Results.NotFound(new { message = "No hay empleado vinculado al usuario actual" });
+
+            var result = await m.Send(new RegistrarFichajeCommand(empleadoId, req.Tipo, Notas: req.Notas), ct);
+            return result.ToHttpResult(201);
+        }).WithName("RegistrarFichajeMe").WithTags("RRHH");
+
         group.MapDelete("/fichajes/{id:guid}", async (Guid id, IMediator m, CancellationToken ct) =>
             (await m.Send(new DeleteFichajeCommand(id), ct)).ToHttpResult())
             .WithName("DeleteFichaje").WithTags("RRHH");
@@ -102,6 +127,7 @@ public sealed class RRHHEndpoints : IEndpointGroup
 }
 
 public record AprobarAusenciaRequest(Guid UserId);
+public record FichajeMeRequest(PlanTA.RRHH.Domain.Enums.TipoFichaje Tipo, string? Notas = null);
 public record UpdateEmpleadoRequest(
     string Nombre, string Apellidos, string Puesto,
     string? Email, string? Telefono, string? Departamento,

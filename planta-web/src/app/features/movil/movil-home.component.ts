@@ -18,6 +18,10 @@ import { AuthService } from '../../core/services/auth.service';
       </header>
 
       <div class="movil__grid">
+        <a class="tile tile--fichar" routerLink="fichar">
+          <div class="tile__icon">⏱</div>
+          <div class="tile__label">Fichar<br>Jornada</div>
+        </a>
         <a class="tile tile--primary" routerLink="incidencia-nueva">
           <div class="tile__icon">⚠</div>
           <div class="tile__label">Reportar<br>Incidencia</div>
@@ -50,6 +54,7 @@ import { AuthService } from '../../core/services/auth.service';
       min-height: 140px; text-align: center;
     }
     .tile--primary { background: #dc2626; color: white; }
+    .tile--fichar { background: #10b981; color: white; }
     .tile__icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
     .tile__label { font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
   `],
