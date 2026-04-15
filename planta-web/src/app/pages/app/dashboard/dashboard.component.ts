@@ -8,6 +8,9 @@ import { ProduccionService } from '../../../core/services/produccion.service';
 import { ComprasService } from '../../../core/services/compras.service';
 import { VentasService } from '../../../core/services/ventas.service';
 import { CalidadService } from '../../../core/services/calidad.service';
+import { CrmService } from '../../../core/services/crm.service';
+import { FacturacionService } from '../../../core/services/facturacion.service';
+import { RrhhService } from '../../../core/services/rrhh.service';
 
 interface KpiCard {
   label: string;
@@ -56,6 +59,9 @@ export class DashboardComponent implements OnInit {
   private comprasSvc = inject(ComprasService);
   private ventasSvc = inject(VentasService);
   private calidadSvc = inject(CalidadService);
+  private crmSvc = inject(CrmService);
+  private facturacionSvc = inject(FacturacionService);
+  private rrhhSvc = inject(RrhhService);
 
   readonly kpis = signal<KpiCard[]>([]);
   readonly actividad = signal<ActividadReciente[]>([]);
@@ -99,9 +105,24 @@ export class DashboardComponent implements OnInit {
       ocs: this.comprasSvc.listOCs(undefined, undefined, 1, 1),
       pedidos: this.ventasSvc.listPedidos(undefined, undefined, 1, 1),
       inspecciones: this.calidadSvc.listInspecciones(undefined, undefined, 1, 1),
+      leads: this.crmSvc.listLeads({ pageSize: 100 }),
+      facturas: this.facturacionSvc.listFacturas({ pageSize: 200 }),
+      empleados: this.rrhhSvc.listEmpleados({ pageSize: 1 }),
     }).subscribe({
       next: (data) => {
+        const ahora = new Date();
+        const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+        const facturasMes = data.facturas.items.filter(f => new Date(f.fechaEmision) >= inicioMes && f.estado !== 'Borrador' && f.estado !== 'Anulada');
+        const totalFacturadoMes = facturasMes.reduce((s, f) => s + (f.total ?? 0), 0);
+        const pendienteCobro = data.facturas.items.filter(f => f.estado === 'Emitida' || f.estado === 'Firmada' || f.estado === 'EnviadaVerifactu').reduce((s, f) => s + (f.total ?? 0), 0);
+        const semana = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const leadsNuevos = data.leads.items.filter(l => new Date((l as any).createdAt ?? ahora) >= semana).length;
+
         this.kpis.set([
+          { label: 'Facturado (mes)', value: totalFacturadoMes.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }), delta: `${facturasMes.length} facturas`, deltaPositive: true, icon: 'euro', color: '#10b981' },
+          { label: 'Pendiente cobro', value: pendienteCobro.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }), delta: pendienteCobro > 0 ? 'Seguir impagos' : 'Al día', deltaPositive: pendienteCobro === 0, icon: 'clock', color: '#f59e0b' },
+          { label: 'Leads nuevos (7d)', value: String(leadsNuevos || data.leads.items.length), delta: `${data.leads.totalCount} totales`, deltaPositive: true, icon: 'users', color: '#3b82f6' },
+          { label: 'Empleados', value: String(data.empleados.totalCount), delta: 'Registrados', deltaPositive: true, icon: 'user', color: '#6366f1' },
           { label: 'Total Productos', value: String(data.productos.totalCount), delta: 'En inventario', deltaPositive: true, icon: 'package', color: '#2563eb' },
           { label: 'Ordenes Fabricacion', value: String(data.ofs.totalCount), delta: 'Total registradas', deltaPositive: true, icon: 'factory', color: '#f59e0b' },
           { label: 'Ordenes Compra', value: String(data.ocs.totalCount), delta: 'Total registradas', deltaPositive: true, icon: 'cart', color: '#ef4444' },
