@@ -128,6 +128,11 @@ export const routes: Routes = [
           import('./features/movil/movil.routes').then(m => m.MOVIL_ROUTES),
       },
       {
+        path: 'auditoria',
+        loadComponent: () =>
+          import('./features/auditoria/auditoria-list.component').then(m => m.AuditoriaListComponent),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./pages/app/settings-page/settings-page.component').then(

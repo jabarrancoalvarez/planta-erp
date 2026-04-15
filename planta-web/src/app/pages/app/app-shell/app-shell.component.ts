@@ -57,6 +57,7 @@ export class AppShellComponent {
     { label: 'Costes', icon: 'dollar-sign', route: '/app/costes', roles: ['Administrador', 'GerentePlanta'] },
     { label: 'OEE', icon: 'activity', route: '/app/oee', roles: ['Administrador', 'GerentePlanta', 'JefeProduccion'] },
     { label: 'Importador', icon: 'upload', route: '/app/importador', roles: ['Administrador'] },
+    { label: 'Auditoría', icon: 'shield', route: '/app/auditoria', roles: ['Administrador', 'GerentePlanta'] },
     { label: 'Asistente IA', icon: 'message-square', route: '/app/ia', roles: ALL_ROLES },
     { label: 'Movil', icon: 'smartphone', route: '/app/movil', roles: ['Administrador', 'Operario'] },
     { label: 'Configuracion', icon: 'settings', route: '/app/settings', roles: ALL_ROLES },
