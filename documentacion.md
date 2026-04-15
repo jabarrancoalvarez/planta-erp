@@ -219,10 +219,13 @@ Pipeline en orden:
 
 ### 5.1 Identity + JWT
 
-- `PlanTA.Seguridad.Infrastructure` integra ASP.NET Core Identity con `ApplicationUser` (extiende IdentityUser con `Nombre`, `EmpresaId`, `Rol`).
-- Endpoints `/api/v1/seguridad/auth/login`, `/register`.
+- `PlanTA.Seguridad.Infrastructure` integra ASP.NET Core Identity con `ApplicationUser` (extiende IdentityUser con `Nombre`, `EmpresaId`, `ModulosDeshabilitados` CSV).
+- `Empresa` extendida con `TrialHasta` (DateTimeOffset?) y `OnboardingCompletado` (bool). Factory `Empresa.Crear(nombre, cif, email, trialDias)`.
+- Endpoints `/api/v1/seguridad/auth/login`, `/register` (self-service con trial 14 días), `/refresh`, `/change-password`.
 - JWT firmado con HS256, clave 32+ chars, expiración configurable.
 - Claims: `sub`, `email`, `nombre`, `rol`, `empresaId`, `empresaNombre`.
+- `UserDto` incluye `OnboardingCompletado`, `TrialHasta`, `ModulosDeshabilitados[]`.
+- Schema actualizado al arranque mediante `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` idempotente en `Program.cs` (`TrialHasta`, `OnboardingCompletado`, `ModulosDeshabilitados`).
 
 ### 5.2 Roles
 
@@ -239,12 +242,41 @@ Pipeline en orden:
 
 El frontend filtra el sidebar según el rol vía `roleGuard`.
 
+### 5.2.1 Permisos granulares por usuario (Fase 3)
+
+Además del filtrado por rol, cada `ApplicationUser` tiene `ModulosDeshabilitados` (lista CSV) que permite al Administrador **desactivar módulos concretos para un usuario individual** con granularidad fina, sobreescribiendo los defaults del rol.
+
+- Entidad: `ApplicationUser.ModulosDeshabilitados` (string CSV, nullable).
+- Interfaz: `IIdentityService.ListUsersByEmpresaAsync(empresaId)` y `UpdateModulosDeshabilitadosAsync(userId, modulos)`.
+- Endpoints (solo rol `Administrador`):
+  - `GET /api/v1/seguridad/usuarios` — lista usuarios de la empresa con sus módulos deshabilitados.
+  - `PUT /api/v1/seguridad/usuarios/{userId}/modulos` — body `{ modulosDeshabilitados: string[] }`.
+- Frontend: página `/app/permisos` (sólo Admin) con checkboxes por usuario sobre los 17 módulos disponibles.
+- Sidebar (`app-shell.component.ts → navItems` computed): tras filtrar por rol, elimina módulos cuyo último segmento de ruta coincida (case-insensitive) con un valor en `user.modulosDeshabilitados`.
+
 ### 5.3 DB Seed
 
 `DbInitializer.SeedAsync()` crea en cada arranque:
 - Roles (los 8 anteriores).
 - Empresa demo `Empresa Demo S.L.`.
 - Usuarios demo: `admin@demo.com`, `gerente@demo.com`, `tecnico@demo.com` (password `Demo1234!`).
+- Admin global: `admin@planta-erp.com / Admin2026!!`.
+
+### 5.4 Registro self-service + onboarding (Fase 3)
+
+El registro comercial ya no requiere alta manual. Flujo:
+
+1. `POST /api/v1/seguridad/auth/register` — body `{ nombre, email, password, empresaNombre, cif? }`. `IIdentityService.RegisterEmpresaAsync` orquesta:
+   - Verifica email único.
+   - Crea `Empresa` vía `Empresa.Crear(nombre, cif, email, trialDias: 14)` → SaveChanges.
+   - Crea `ApplicationUser` con `UserManager` (rollback de Empresa si falla).
+   - Asigna rol `Administrador`.
+   - Llama `LoginAsync` y devuelve `TokenPairDto` (acceso inmediato).
+2. **Onboarding guard** (`onboardingGuard`): si `user.onboardingCompletado === false`, redirige cualquier ruta `/app/*` a `/app/onboarding`.
+3. **Wizard** (`/app/onboarding`): 3 opciones — "Empezar vacío", "Cargar datos demo", "Importar CSV".
+4. `POST /api/v1/seguridad/empresa/cargar-datos-demo` — `EmpresaDemoSeeder` crea 21 entidades (5 Leads CRM, 8 Productos, 3 Proveedores, 5 Empleados) y marca `OnboardingCompletado = true`.
+5. `POST /api/v1/seguridad/empresa/completar-onboarding` — marca onboarding completado manualmente (opciones vacío / importar).
+6. **Banner trial**: `app-shell` muestra un banner con días restantes calculados desde `user.trialHasta`, con variante `--expired` cuando `dias < 0`.
 
 ---
 
@@ -347,21 +379,113 @@ Al primer arranque en producción, `DbInitializer` ejecuta `EnsureCreatedAsync()
 
 ---
 
-## 8. Estado actual (2026-04-14)
+## 8. Fase 3 — Funcionalidades comerciales
 
-- ✅ 15 módulos backend implementados, build limpio (0 errores, 0 warnings).
-- ✅ Cross-cutting (Outbox, Audit, MediatR Behaviors) funcionando.
-- ✅ Frontend con 9 features web + PWA móvil.
-- ✅ Deploy productivo Render + Vercel + Neon (los 5 módulos originales). Los 10 nuevos están commiteados y pendientes de redeploy + verificación de creación de tablas.
-- ⚠️ Frontend de los módulos CRM, Costes, Facturación, IA, Importador, OEE, RRHH **aún no está implementado** — solo existe el backend.
-- ⚠️ Tests E2E pendientes.
+Tras cerrar la Fase 2 (CRUD completos en los 15 módulos), se añadieron 7 bloques puramente backend/frontend para convertir PlanTA en producto vendible. Otros 7 quedan diferidos (requieren servicios externos o decisiones comerciales: Stripe, integraciones bancarias, PWA avanzada, landing, soporte, GDPR, nicho).
+
+### 8.1 Onboarding sin fricción (punto 1)
+
+Ya documentado en §5.4. Self-service registration + trial 14 días + wizard + seed demo + banner.
+
+### 8.2 Dashboard con KPIs reales (punto 3)
+
+`dashboard.component.ts` ahora inyecta `CrmService`, `FacturacionService`, `RrhhService` además de los anteriores y usa `forkJoin` para cargar en paralelo. KPIs calculados client-side:
+
+- **Facturado (mes)**: suma de `factura.total` de las facturas del mes en curso no `Borrador`/`Anulada`.
+- **Pendiente cobro**: suma de facturas en estados `Emitida`/`Firmada`/`EnviadaVerifactu`.
+- **Leads nuevos (7d)**: conteo de leads creados en los últimos 7 días.
+- **Empleados**: total registrados.
+- KPIs existentes (Total Productos, OFs, OCs, Pedidos, Inspecciones, Alertas Stock).
+
+Formato monetario con `Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' })`. Fallback "Sin conexión API" si falla el forkJoin.
+
+### 8.3 Exports CSV (punto 4)
+
+`ExportService.exportToCsv(filename, headers, rows)` genera un CSV con BOM UTF-8 (compat Excel) y dispara la descarga. Integrado en:
+
+- Facturas (`facturacion/facturas-list`).
+- Clientes (`ventas/clientes/clientes-list`).
+- Proveedores (`compras/proveedores/proveedores-list`).
+- Empleados (`rrhh/empleados-list`).
+- Leads (`crm/leads-list`).
+- Ya existía en Productos (`inventario/productos/productos-list`).
+
+Cada lista expone un botón "Exportar CSV" en el header. PDF de facturas y envío por email quedan diferidos.
+
+### 8.4 Notificaciones in-app (punto 7)
+
+Sistema de notificaciones persistidas en DB con campana en topbar. Email y push web diferidos.
+
+**Backend**:
+- Entidad `seguridad.Notificacion` con campos: `Id`, `EmpresaId`, `UsuarioId?` (null = broadcast), `Titulo`, `Mensaje`, `Tipo`, `Url?`, `Leida`, `CreatedAt`, `LeidaAt?`. Factory `Notificacion.Crear(...)` y método `MarcarLeida()`.
+- `DbSet<Notificacion>` en `SeguridadDbContext` con índice compuesto `(EmpresaId, UsuarioId, Leida)`.
+- Tabla creada vía `CREATE TABLE IF NOT EXISTS seguridad."Notificaciones"` idempotente en `Program.cs` (porque `CreateTablesAsync` aborta al primer conflicto).
+- `NotificacionesEndpoints`:
+  - `GET /api/v1/notificaciones?soloNoLeidas&take` — lista notificaciones del usuario (las suyas + broadcasts) y contador `noLeidas`.
+  - `POST /api/v1/notificaciones` — crear (roles `Administrador`/`GerentePlanta`).
+  - `POST /api/v1/notificaciones/{id}/marcar-leida`.
+  - `POST /api/v1/notificaciones/marcar-todas-leidas`.
+
+**Frontend**:
+- `NotificacionesService` con signals `items` y `noLeidas`.
+- Campana en `app-shell` topbar con badge contador y dropdown con lista.
+- Polling cada 60 s via `setInterval` en `ngOnInit`; limpieza en `ngOnDestroy`.
+- Click en una notificación: marca leída + navega a `n.url` si existe.
+
+### 8.5 Permisos granulares (punto 8)
+
+Ya documentado en §5.2.1.
+
+### 8.6 Auditoría UI (punto 9)
+
+El backend ya escribía `shared.AuditEntries` (via `AuditBehavior`). Se añade el frontend:
+
+- `AuditoriaService` (frontend) consume `GET /api/v1/auditoria` con filtros `entityType`, `userId`, `from`, `to`, `page`, `pageSize`.
+- Página `/app/auditoria` (roles `Administrador`/`GerentePlanta`):
+  - Tabla con fecha, usuario, acción, entidad, ID, IP.
+  - Botón "Ver cambios" expande una fila con `OldValues` / `NewValues` (JSON) lado a lado.
+  - Filtros por tipo de entidad y usuario con debounce 300 ms.
+
+### 8.7 Rendimiento y fiabilidad (punto 13)
+
+- **GlobalErrorHandler Angular** (`core/services/error-handler.service.ts`): implementa `ErrorHandler`, captura errores no manejados y los envía via POST a `/api/v1/sistema/frontend-error`. Evita recursión con flag `reporting`. Ignora `HttpErrorResponse` (ya los gestionan los servicios). Registrado como provider en `app.config.ts`.
+- **SistemaEndpoints**:
+  - `GET /api/v1/sistema/health` — status, timestamp, versión del assembly (público).
+  - `POST /api/v1/sistema/frontend-error` — payload `{ message, stack, url, userAgent, timestamp }` → `logger.LogError` (vía Serilog).
+- **Middleware `X-Response-Time-ms`**: registrado en `Program.cs` antes de `UseCors`. Usa `Stopwatch` y `ctx.Response.OnStarting` para escribir la cabecera en todas las respuestas.
+- Paginación server-side ya estaba en los listados principales (`PagedResult<T>` + `listX(query, page, pageSize)`).
+- Sentry / status page quedan diferidos (requieren servicios externos).
+
+### 8.8 Puntos diferidos
+
+| Punto | Descripción | Por qué se difiere |
+|---|---|---|
+| 2 | Facturación SaaS (Stripe, planes, portal) | Cuenta Stripe + decisiones de pricing |
+| 5 | Integraciones bancarias, email, WhatsApp, contabilidad | APIs externas + credenciales |
+| 6 | App móvil PWA completa | Requiere decisión sobre alcance nativo vs PWA avanzada |
+| 10 | Landing + contenido SEO + testimonios | Trabajo de marketing/copy |
+| 11 | Soporte (chat live, help center, vídeos) | Herramientas externas |
+| 12 | Cumplimiento GDPR (export/delete, backups, privacidad) | Requiere revisión legal |
+| 14 | Foco de mercado | Decisión estratégica de nicho |
 
 ---
 
-## 9. Roadmap próximo
+## 9. Estado actual (2026-04-15)
 
-1. Verificar que Render despliega los 10 nuevos schemas.
-2. Implementar frontend para CRM, Facturación, OEE, RRHH (los más prioritarios para el cliente).
-3. Tests de integración por módulo (xUnit + Testcontainers).
-4. Webhooks de Stripe para facturación SaaS.
-5. Notificaciones push en la PWA móvil.
+- ✅ 15 módulos backend implementados, build limpio (0 errores, 0 warnings).
+- ✅ Cross-cutting (Outbox, Audit, MediatR Behaviors) funcionando.
+- ✅ Frontend con features web + PWA móvil.
+- ✅ Fase 3 comercial — 7 puntos backend/frontend cerrados (1, 3, 4, 7, 8, 9, 13), 7 diferidos (2, 5, 6, 10, 11, 12, 14).
+- ✅ Deploy productivo Render + Vercel + Neon con los commits de Fase 3 pusheados (`bcbe80f..74299cd`).
+- ⚠️ `Anthropic__ApiKey` debe estar configurado en Render para el asistente IA.
+- ⚠️ Tests E2E pendientes. QA completo planificado con agente `qa-tester`.
+
+---
+
+## 10. Roadmap próximo
+
+1. QA manual + automatizado de los 7 puntos de Fase 3 con el agente `qa-tester`.
+2. Validar que Render crea la tabla `seguridad.Notificaciones` y los nuevos campos en `AspNetUsers` / `Empresas` al primer arranque tras el deploy.
+3. Afrontar los diferidos por orden de impacto comercial: primero Stripe (punto 2), después landing (punto 10).
+4. Tests de integración por módulo (xUnit + Testcontainers).
+5. Notificaciones push web (VAPID) sobre la infraestructura in-app ya existente.

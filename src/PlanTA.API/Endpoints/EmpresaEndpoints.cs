@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using PlanTA.API.Services;
 using PlanTA.Seguridad.Application.Features.Empresas.CompletarOnboarding;
 using PlanTA.SharedKernel;
@@ -22,12 +23,24 @@ public sealed class EmpresaEndpoints : IEndpointGroup
         .WithTags("Empresa");
 
         group.MapPost("/cargar-datos-demo", [Authorize] async (
-            EmpresaDemoSeeder seeder, ICurrentTenant tenant, IMediator m, CancellationToken ct) =>
+            EmpresaDemoSeeder seeder, ICurrentTenant tenant, IMediator m,
+            ILogger<EmpresaDemoSeeder> logger, CancellationToken ct) =>
         {
-            var seed = await seeder.SeedAsync(tenant.EmpresaId, ct);
-            if (!seed.IsSuccess) return seed.ToHttpResult();
-            await m.Send(new CompletarOnboardingCommand(), ct);
-            return Results.Ok(new { creados = seed.Value });
+            try
+            {
+                var seed = await seeder.SeedAsync(tenant.EmpresaId, ct);
+                if (!seed.IsSuccess) return seed.ToHttpResult();
+                await m.Send(new CompletarOnboardingCommand(), ct);
+                return Results.Ok(new { creados = seed.Value });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error cargando datos demo para empresa {EmpresaId}", tenant.EmpresaId);
+                return Results.Problem(
+                    title: "Error al cargar datos demo",
+                    detail: $"{ex.GetType().Name}: {ex.Message}{(ex.InnerException != null ? " | Inner: " + ex.InnerException.Message : "")}",
+                    statusCode: 500);
+            }
         })
         .WithName("CargarDatosDemo")
         .WithTags("Empresa");

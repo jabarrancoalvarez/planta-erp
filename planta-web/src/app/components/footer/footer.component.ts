@@ -18,7 +18,7 @@ export class FooterComponent {
       { label: 'Integraciones', href: '#' },
     ],
     empresa: [
-      { label: 'Sobre FixFlow', href: '#' },
+      { label: 'Sobre PlanTA', href: '#' },
       { label: 'Blog', href: '#' },
       { label: 'Casos de éxito', href: '#social-proof' },
       { label: 'Contacto', href: '#' },

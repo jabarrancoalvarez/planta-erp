@@ -79,6 +79,19 @@ npm start
 
 ## 4. Login y roles
 
+### 4.0 Registro self-service (Fase 3)
+
+Antes de usar los usuarios demo, valida el flujo de alta de nueva empresa:
+
+1. Desde `/register`, rellena `nombre`, `email` (nuevo), `password`, `empresaNombre`, opcionalmente `cif`.
+2. **Validar**: redirige a `/app/onboarding` (guard activo porque `onboardingCompletado = false`).
+3. `psql` debe mostrar la nueva empresa con `TrialHasta ≈ now + 14 días` y `OnboardingCompletado = false`.
+4. En el wizard, probar cada opción:
+   - **Empezar vacío** → `POST /seguridad/empresa/completar-onboarding` → redirige al dashboard.
+   - **Cargar datos demo** → `POST /seguridad/empresa/cargar-datos-demo` → crea 21 entidades (5 Leads, 8 Productos, 3 Proveedores, 5 Empleados) + marca `OnboardingCompletado`. Validar con psql.
+   - Si intentas llamar a `cargar-datos-demo` dos veces, debe devolver `Conflict: Demo.YaInicializada`.
+5. **Banner trial**: tras el wizard, el `app-shell` debe mostrar "Trial: 14 días restantes". Cambiar `TrialHasta` a pasado y recargar → banner con variante `--expired`.
+
 ### 4.1 Login como Admin
 
 - Email: `admin@demo.com`
@@ -109,7 +122,12 @@ Como `tecnico@demo.com`, intenta navegar manualmente a `/inventario/productos`.
 ## 5. Dashboard
 
 Como Admin, en el dashboard:
-- Validar que se cargan los **KPIs reales** vía `forkJoin` (productos totales, OFs activas, OCs pendientes, etc.).
+- Validar que se cargan los **KPIs reales** vía `forkJoin` con los 9 servicios (Inventario, Producción, Compras, Ventas, Calidad, CRM, Facturación, RRHH, Alertas).
+- KPIs financieros (Fase 3):
+  - **Facturado (mes)**: suma de facturas del mes en curso en estado distinto a `Borrador`/`Anulada`, formateado como `€`.
+  - **Pendiente cobro**: suma de facturas en `Emitida`/`Firmada`/`EnviadaVerifactu`.
+  - **Leads nuevos (7d)**: conteo de leads con `createdAt` en los últimos 7 días.
+  - **Empleados**: total registrados.
 - Si la API está caída, debe mostrar "Sin conexión API" como fallback (no crash).
 - Accesos rápidos a los módulos.
 
@@ -326,6 +344,89 @@ Los siguientes módulos **no tienen UI todavía** — pruébalos desde Swagger (
 
 ---
 
+## 15bis. Funcionalidades comerciales de Fase 3
+
+### 15bis.1 Exports CSV
+
+Validar el botón "Exportar CSV" en el header de estos 6 listados:
+
+- `Inventario → Productos` (ya existente).
+- `Ventas → Clientes`.
+- `Compras → Proveedores`.
+- `Facturación → Facturas`.
+- `RRHH → Empleados`.
+- `CRM → Leads`.
+
+**Por cada uno:**
+- Click "Exportar CSV" → descarga `<modulo>.csv`.
+- Abrir con Excel → tildes y símbolos `€` se muestran correctamente (BOM UTF-8).
+- Las columnas coinciden con las visibles en la tabla.
+- Si hay filtro activo o búsqueda, sólo se exporta lo cargado en memoria (los `items()` del signal).
+
+### 15bis.2 Permisos granulares por usuario
+
+Como `admin@demo.com`:
+
+1. Navega a `/app/permisos`. Debe aparecer el listado de usuarios de la empresa con su rol y módulos deshabilitados (vacío por defecto).
+2. Click "Editar" en un usuario comercial. Aparecen checkboxes con los 17 módulos disponibles.
+3. Marca `inventario` y `produccion` como deshabilitados → "Guardar".
+4. **Validar psql**: `SELECT "ModulosDeshabilitados" FROM seguridad."AspNetUsers" WHERE "Email" = '...'` → `inventario,produccion`.
+5. Logout. Login como ese usuario. Inventario y Producción **no aparecen** en el sidebar (pese a que su rol los permita).
+6. Intenta navegar manualmente a `/app/inventario` → debe fallar.
+7. Volver como Admin, editar y desmarcar → el usuario recupera los módulos.
+
+**Endpoints directos en Swagger:**
+- `GET /api/v1/seguridad/usuarios` — solo Admin.
+- `PUT /api/v1/seguridad/usuarios/{id}/modulos` — body `{ "modulosDeshabilitados": ["inventario"] }`.
+
+### 15bis.3 Auditoría UI
+
+Como Admin, navega a `/app/auditoria`:
+
+- Lista cronológica descendente de las acciones registradas (via `AuditBehavior`).
+- Columnas: fecha, usuario, acción, entidad, ID, IP.
+- **Filtro por tipo de entidad**: escribir "Producto" → solo se muestran acciones sobre productos (debounce 300 ms).
+- **Filtro por usuario**: pegar un `userId`.
+- Click "Ver cambios" en una fila → despliega panel con `OldValues` (antes) y `NewValues` (después) lado a lado en JSON.
+- Rol `GerentePlanta` también tiene acceso. Rol `Operario` **no** debe ver la entrada en el sidebar.
+
+### 15bis.4 Notificaciones in-app
+
+**Generar una notificación (Swagger):**
+```http
+POST /api/v1/notificaciones
+Authorization: Bearer <admin-token>
+{
+  "titulo": "Nueva alerta de stock",
+  "mensaje": "El producto SKU-001 está por debajo del mínimo",
+  "tipo": "warning",
+  "url": "/app/inventario/alertas"
+}
+```
+
+**Frontend:**
+- La campana del topbar muestra un badge rojo con el contador (`1`).
+- Click en la campana → dropdown con la notificación, fondo azul claro (unread).
+- Click en la notificación → marca como leída (badge desaparece) y navega a `/app/inventario/alertas`.
+- Probar "Marcar todas" con varias notificaciones pendientes.
+- Validar polling: esperar 60 s sin interacción, crear otra notificación vía Swagger, verificar que la cuenta se actualiza sola.
+- **Broadcasts**: crear una notificación sin `usuarioId` → todos los usuarios de la empresa la ven.
+- **Dirigidas**: crear con `usuarioId` de otro usuario → el admin no la ve, pero sí el destinatario al loguearse.
+
+**Validar psql:**
+```sql
+SELECT "Id", "Titulo", "UsuarioId", "Leida", "CreatedAt" FROM seguridad."Notificaciones" ORDER BY "CreatedAt" DESC LIMIT 10;
+```
+
+### 15bis.5 Sistema / health / error handling
+
+- `GET /api/v1/sistema/health` (anonymous) → `{ status: "ok", timestamp, version }`.
+- **X-Response-Time-ms**: en el navegador (DevTools → Network → cualquier request) la respuesta incluye la cabecera `X-Response-Time-ms` con un entero.
+- **GlobalErrorHandler**: provoca un error frontend (por ejemplo `throw new Error('test')` en la consola del navegador dentro del contexto Angular, o una excepción en un handler). Debe verse en los logs de la API un `[FrontendError] test | url=... | ua=...`.
+- Confirmar que los errores HTTP normales (404 de listado vacío) **no** generan `frontend-error` (el handler los filtra con `instanceof HttpErrorResponse`).
+
+---
+
 ## 16. Cross-cutting
 
 ### 16.1 Outbox Pattern
@@ -443,6 +544,20 @@ git push
 - [ ] Paginación + búsqueda con debounce
 - [ ] Toasts de éxito/error
 - [ ] Deploy: Render + Vercel + Neon funcionando con los 16 schemas
+
+### Fase 3 comercial
+
+- [ ] Registro self-service `/auth/register` crea empresa + admin + trial 14 días
+- [ ] Onboarding wizard se muestra tras primer login y persiste `onboardingCompletado`
+- [ ] Banner de trial visible en topbar con días restantes
+- [ ] Dashboard muestra KPIs financieros reales (facturado mes, pendiente cobro, leads, empleados)
+- [ ] Export CSV funciona en clientes, proveedores, empleados, leads, facturas
+- [ ] `/app/permisos` permite a Admin deshabilitar módulos por usuario y el sidebar los oculta
+- [ ] `/app/auditoria` lista entradas con filtros y diff old/new expandible
+- [ ] Campana de notificaciones muestra badge, polling 60s, marcar leída/todas
+- [ ] `GET /api/v1/sistema/health` responde 200 con version + timestamp
+- [ ] Header `X-Response-Time-ms` presente en respuestas de API
+- [ ] Errores no-HTTP del frontend llegan al backend vía `/sistema/frontend-error`
 
 ---
 

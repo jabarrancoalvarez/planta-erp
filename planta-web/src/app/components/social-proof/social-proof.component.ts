@@ -35,7 +35,7 @@ export class SocialProofComponent {
 
   readonly testimonials: Testimonial[] = [
     {
-      quote: 'Pasamos de perder incidencias a resolverlas en horas. FixFlow es absolutamente indispensable para nuestro equipo.',
+      quote: 'Pasamos de perder incidencias a resolverlas en horas. PlanTA es absolutamente indispensable para nuestro equipo.',
       name: 'Carlos M.',
       role: 'Jefe de Mantenimiento',
       company: 'MetalParts S.L.',
