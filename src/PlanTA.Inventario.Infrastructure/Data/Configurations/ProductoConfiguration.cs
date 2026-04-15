@@ -14,7 +14,6 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.OwnsOne(x => x.SKU, sku =>
         {
             sku.Property(s => s.Value).HasColumnName("SKU").HasMaxLength(50).IsRequired();
-            sku.HasIndex(s => s.Value).IsUnique();
         });
 
         builder.Property(x => x.Nombre).HasMaxLength(200).IsRequired();

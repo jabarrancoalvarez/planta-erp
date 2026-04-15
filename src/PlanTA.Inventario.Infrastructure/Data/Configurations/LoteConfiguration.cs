@@ -16,7 +16,6 @@ public class LoteConfiguration : IEntityTypeConfiguration<Lote>
         builder.OwnsOne(x => x.Codigo, codigo =>
         {
             codigo.Property(c => c.Value).HasColumnName("Codigo").HasMaxLength(50).IsRequired();
-            codigo.HasIndex(c => c.Value).IsUnique();
         });
 
         builder.Property(x => x.CantidadInicial).HasPrecision(18, 4);

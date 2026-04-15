@@ -267,6 +267,27 @@ using (var scope = app.Services.CreateScope())
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<OEEDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<IADbContext>());
 
+    // Fix unique indexes: global → scoped por EmpresaId (multi-tenant correcto)
+    try
+    {
+        var invDb = scope.ServiceProvider.GetRequiredService<InventarioDbContext>();
+        await invDb.Database.ExecuteSqlRawAsync("DROP INDEX IF EXISTS inventario.\"IX_Productos_SKU\"");
+        await invDb.Database.ExecuteSqlRawAsync(
+            "CREATE UNIQUE INDEX IF NOT EXISTS \"IX_Productos_EmpresaId_SKU\" ON inventario.\"Productos\" (\"EmpresaId\", \"SKU\")");
+        await invDb.Database.ExecuteSqlRawAsync("DROP INDEX IF EXISTS inventario.\"IX_Lotes_Codigo\"");
+        await invDb.Database.ExecuteSqlRawAsync(
+            "CREATE UNIQUE INDEX IF NOT EXISTS \"IX_Lotes_EmpresaId_Codigo\" ON inventario.\"Lotes\" (\"EmpresaId\", \"Codigo\")");
+
+        var prodDb = scope.ServiceProvider.GetRequiredService<ProduccionDbContext>();
+        await prodDb.Database.ExecuteSqlRawAsync("DROP INDEX IF EXISTS produccion.\"IX_ordenes_fabricacion_CodigoOF\"");
+        await prodDb.Database.ExecuteSqlRawAsync(
+            "CREATE UNIQUE INDEX IF NOT EXISTS \"IX_ordenes_fabricacion_EmpresaId_CodigoOF\" ON produccion.\"ordenes_fabricacion\" (\"EmpresaId\", \"CodigoOF\")");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "No se pudieron ajustar índices únicos multi-tenant (puede ser normal si ya estaban corregidos)");
+    }
+
     // Seed roles
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
     string[] roles = ["Administrador", "GerentePlanta", "JefeAlmacen", "JefeProduccion", "Compras", "Ventas", "Calidad", "Operario"];

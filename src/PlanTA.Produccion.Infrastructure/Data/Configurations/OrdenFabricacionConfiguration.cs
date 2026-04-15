@@ -16,7 +16,6 @@ public class OrdenFabricacionConfiguration : IEntityTypeConfiguration<OrdenFabri
         builder.OwnsOne(x => x.CodigoOF, codigo =>
         {
             codigo.Property(c => c.Value).HasColumnName("CodigoOF").HasMaxLength(50).IsRequired();
-            codigo.HasIndex(c => c.Value).IsUnique();
         });
 
         builder.Property(x => x.ListaMaterialesId)
