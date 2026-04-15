@@ -253,6 +253,15 @@ using (var scope = app.Services.CreateScope())
 
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<InventarioDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ProduccionDbContext>());
+
+    // Reset legacy Compras schema (Proveedor owned-type refactor broke column mapping)
+    try
+    {
+        var comprasReset = scope.ServiceProvider.GetRequiredService<ComprasDbContext>();
+        await comprasReset.Database.ExecuteSqlRawAsync(
+            "DROP TABLE IF EXISTS compras.\"proveedores\" CASCADE");
+    }
+    catch { }
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<ComprasDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<VentasDbContext>());
     await EnsureTablesAsync(scope.ServiceProvider.GetRequiredService<CalidadDbContext>());
