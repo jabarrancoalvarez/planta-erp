@@ -262,8 +262,7 @@ using (var scope = app.Services.CreateScope())
         await comprasReset.Database.ExecuteSqlRawAsync(@"
             DO $$
             BEGIN
-              IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='compras' AND table_name='proveedores')
-                 AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='compras' AND table_name='proveedores' AND column_name='DescuentoProntoPago') THEN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='compras' AND table_name='proveedores' AND column_name='DescuentoProntoPago') THEN
                 DROP TABLE IF EXISTS compras.""lineas_recepcion"" CASCADE;
                 DROP TABLE IF EXISTS compras.""recepciones"" CASCADE;
                 DROP TABLE IF EXISTS compras.""lineas_orden_compra"" CASCADE;
