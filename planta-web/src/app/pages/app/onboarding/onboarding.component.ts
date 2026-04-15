@@ -1,7 +1,10 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-onboarding',
@@ -27,8 +30,7 @@ import { AuthService } from '../../../core/services/auth.service';
           <button class="option-card" [disabled]="loading()" (click)="cargarDemo()">
             <div class="option-card__icon">🎯</div>
             <h3>Cargar datos demo</h3>
-            <p>Empresa de ejemplo con productos, clientes y facturas para ver cómo funciona todo.</p>
-            <span class="option-card__badge">Próximamente</span>
+            <p>Empresa de ejemplo con productos, clientes, proveedores y empleados reales.</p>
           </button>
 
           <button class="option-card" [disabled]="loading()" (click)="importarCSV()">
@@ -110,6 +112,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class OnboardingComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -126,7 +129,19 @@ export class OnboardingComponent {
   }
 
   async cargarDemo(): Promise<void> {
-    this.error.set('Datos demo aún no disponibles. Prueba "Empezar vacío" o "Importar CSV".');
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/seguridad/empresa/cargar-datos-demo`, {})
+      );
+      await this.auth.completarOnboarding();
+      this.router.navigate(['/app/dashboard']);
+    } catch (err: any) {
+      this.error.set(err?.error?.message ?? 'Error al cargar datos demo');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async importarCSV(): Promise<void> {

@@ -135,6 +135,7 @@ builder.Services.AddDbContext<AuditDbContext>(options =>
         npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory_Audit", "shared")));
 
 builder.Services.AddScoped<IAuditStore, AuditStore>();
+builder.Services.AddScoped<PlanTA.API.Services.EmpresaDemoSeeder>();
 
 // -- Modulo Seguridad (Identity + JWT) --
 builder.Services.AddSeguridadInfrastructure(builder.Configuration);
