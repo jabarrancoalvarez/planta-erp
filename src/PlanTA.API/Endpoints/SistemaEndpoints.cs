@@ -14,7 +14,7 @@ public sealed class SistemaEndpoints : IEndpointGroup
             timestamp = DateTimeOffset.UtcNow,
             version = typeof(SistemaEndpoints).Assembly.GetName().Version?.ToString() ?? "1.0.0",
         }))
-        .WithName("HealthCheck")
+        .WithName("SistemaHealthCheck")
         .WithTags("Sistema")
         .AllowAnonymous();
 
