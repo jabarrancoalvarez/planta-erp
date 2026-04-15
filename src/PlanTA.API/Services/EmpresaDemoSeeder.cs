@@ -52,12 +52,13 @@ public sealed class EmpresaDemoSeeder(
         total += 8;
 
         // --- Compras: 3 proveedores ---
-        var pago30 = new CondicionesPago(30, 0m, "Transferencia");
-        var pago60 = new CondicionesPago(60, 2m, "Pagare");
+        // Instancia nueva de CondicionesPago por proveedor: EF owned types no pueden compartirse.
+        static CondicionesPago Pago30() => new(30, 0m, "Transferencia");
+        static CondicionesPago Pago60() => new(60, 2m, "Pagare");
         com.Proveedores.AddRange(
-            Proveedor.Crear("Aceros del Norte SL", "B12345678", "ventas@acerosdelnorte.es", pago30, empresaId, "Pol. Ind. Norte 12", "Bilbao", "48001", "España", "944112233"),
-            Proveedor.Crear("Suministros Industriales García", "B87654321", "pedidos@suminigarcia.es", pago60, empresaId, "Calle Mayor 45", "Zaragoza", "50001", "España", "976223344"),
-            Proveedor.Crear("Ferretería Industrial Levante", "B11223344", "info@ferrileverante.es", pago30, empresaId, "Av. Puerto 89", "Valencia", "46001", "España", "963334455")
+            Proveedor.Crear("Aceros del Norte SL", "B12345678", "ventas@acerosdelnorte.es", Pago30(), empresaId, "Pol. Ind. Norte 12", "Bilbao", "48001", "España", "944112233"),
+            Proveedor.Crear("Suministros Industriales García", "B87654321", "pedidos@suminigarcia.es", Pago60(), empresaId, "Calle Mayor 45", "Zaragoza", "50001", "España", "976223344"),
+            Proveedor.Crear("Ferretería Industrial Levante", "B11223344", "info@ferrileverante.es", Pago30(), empresaId, "Av. Puerto 89", "Valencia", "46001", "España", "963334455")
         );
         total += 3;
 
@@ -72,22 +73,10 @@ public sealed class EmpresaDemoSeeder(
         );
         total += 5;
 
-        try
-        {
-            await crm.SaveChangesAsync(ct);
-            await inv.SaveChangesAsync(ct);
-            await com.SaveChangesAsync(ct);
-            await rrhh.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateException ex)
-        {
-            var inner = ex.InnerException?.Message ?? "";
-            var entries = ex.Entries.Select(e =>
-                $"{e.Entity.GetType().Name}[{e.State}]={{{string.Join(",", e.Properties.Select(p => $"{p.Metadata.Name}={p.CurrentValue}"))}}}");
-            return Result<int>.Failure(Error.Validation(
-                "Demo.SaveFailed",
-                $"{ex.Message} | Inner: {inner} | Entries: {string.Join(" || ", entries)}"));
-        }
+        await crm.SaveChangesAsync(ct);
+        await inv.SaveChangesAsync(ct);
+        await com.SaveChangesAsync(ct);
+        await rrhh.SaveChangesAsync(ct);
 
         return Result<int>.Success(total);
     }
