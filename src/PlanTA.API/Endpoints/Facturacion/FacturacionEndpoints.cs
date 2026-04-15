@@ -33,20 +33,33 @@ public sealed class FacturacionEndpoints : IEndpointGroup
 
         group.MapGet("/facturas/{id:guid}/pdf", async (
             Guid id, IMediator m, FacturaPdfService pdf,
-            SeguridadDbContext seguridad, ICurrentTenant tenant, CancellationToken ct) =>
+            SeguridadDbContext seguridad, ICurrentTenant tenant,
+            ILoggerFactory loggerFactory, CancellationToken ct) =>
         {
-            var result = await m.Send(new GetFacturaQuery(id), ct);
-            if (!result.IsSuccess || result.Value is null)
-                return Results.NotFound(result);
+            var logger = loggerFactory.CreateLogger("FacturaPdf");
+            try
+            {
+                var result = await m.Send(new GetFacturaQuery(id), ct);
+                if (!result.IsSuccess || result.Value is null)
+                    return Results.NotFound(result);
 
-            var empresa = await seguridad.Empresas.AsNoTracking()
-                .Where(e => e.Id.Value == tenant.EmpresaId)
-                .Select(e => new { e.Nombre, e.CIF })
-                .FirstOrDefaultAsync(ct);
+                var empresa = await seguridad.Empresas.AsNoTracking()
+                    .Where(e => e.Id.Value == tenant.EmpresaId)
+                    .Select(e => new { e.Nombre, e.CIF })
+                    .FirstOrDefaultAsync(ct);
 
-            var bytes = pdf.Generate(result.Value, empresa?.Nombre ?? "Empresa", empresa?.CIF);
-            var filename = $"{result.Value.NumeroCompleto.Replace('/', '-')}.pdf";
-            return Results.File(bytes, "application/pdf", filename);
+                var bytes = pdf.Generate(result.Value, empresa?.Nombre ?? "Empresa", empresa?.CIF);
+                var filename = $"{result.Value.NumeroCompleto.Replace('/', '-')}.pdf";
+                return Results.File(bytes, "application/pdf", filename);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error generando PDF factura {Id}", id);
+                return Results.Problem(
+                    title: "Error generando PDF",
+                    detail: $"{ex.GetType().Name}: {ex.Message}",
+                    statusCode: 500);
+            }
         }).WithName("GetFacturaPdf").WithTags("Facturacion");
 
         group.MapPost("/facturas", async (CreateFacturaCommand cmd, IMediator m, CancellationToken ct) =>
