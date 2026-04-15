@@ -1,7 +1,8 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { InventarioService } from '../../../core/services/inventario.service';
 import { ProduccionService } from '../../../core/services/produccion.service';
@@ -98,16 +99,17 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadKpis(): void {
+    const emptyPage = { items: [] as any[], totalCount: 0, page: 1, pageSize: 1, totalPages: 0 };
     forkJoin({
-      productos: this.inventarioSvc.listProductos(undefined, 1, 1),
-      alertas: this.inventarioSvc.listAlertas(),
-      ofs: this.produccionSvc.listOFs(undefined, undefined, 1, 1),
-      ocs: this.comprasSvc.listOCs(undefined, undefined, 1, 1),
-      pedidos: this.ventasSvc.listPedidos(undefined, undefined, 1, 1),
-      inspecciones: this.calidadSvc.listInspecciones(undefined, undefined, 1, 1),
-      leads: this.crmSvc.listLeads({ pageSize: 100 }),
-      facturas: this.facturacionSvc.listFacturas({ pageSize: 200 }),
-      empleados: this.rrhhSvc.listEmpleados({ pageSize: 1 }),
+      productos: this.inventarioSvc.listProductos(undefined, 1, 1).pipe(catchError(() => of(emptyPage))),
+      alertas: this.inventarioSvc.listAlertas().pipe(catchError(() => of([] as any[]))),
+      ofs: this.produccionSvc.listOFs(undefined, undefined, 1, 1).pipe(catchError(() => of(emptyPage))),
+      ocs: this.comprasSvc.listOCs(undefined, undefined, 1, 1).pipe(catchError(() => of(emptyPage))),
+      pedidos: this.ventasSvc.listPedidos(undefined, undefined, 1, 1).pipe(catchError(() => of(emptyPage))),
+      inspecciones: this.calidadSvc.listInspecciones(undefined, undefined, 1, 1).pipe(catchError(() => of(emptyPage))),
+      leads: this.crmSvc.listLeads({ pageSize: 100 }).pipe(catchError(() => of(emptyPage))),
+      facturas: this.facturacionSvc.listFacturas({ pageSize: 200 }).pipe(catchError(() => of(emptyPage))),
+      empleados: this.rrhhSvc.listEmpleados({ pageSize: 1 }).pipe(catchError(() => of(emptyPage))),
     }).subscribe({
       next: (data) => {
         const ahora = new Date();
