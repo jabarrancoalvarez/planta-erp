@@ -1,7 +1,8 @@
-import { Component, inject, signal, computed } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { CommonModule, DatePipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificacionesService, NotificacionDto } from '../../../core/services/notificaciones.service';
 
 interface NavItem {
   label: string;
@@ -16,14 +17,48 @@ const ALL_ROLES = ['Administrador', 'GerentePlanta', 'JefeAlmacen', 'JefeProducc
 @Component({
   selector: 'app-app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, DatePipe],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
 })
-export class AppShellComponent {
+export class AppShellComponent implements OnInit, OnDestroy {
   readonly auth = inject(AuthService);
+  readonly notifSvc = inject(NotificacionesService);
+  private router = inject(Router);
 
   sidebarCollapsed = signal(false);
+  notifMenuOpen = signal(false);
+  private pollHandle: any;
+
+  ngOnInit(): void {
+    this.refreshNotif();
+    this.pollHandle = setInterval(() => this.refreshNotif(), 60_000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollHandle) clearInterval(this.pollHandle);
+  }
+
+  private refreshNotif(): void {
+    this.notifSvc.list(false, 20).subscribe({ error: () => {} });
+  }
+
+  toggleNotifMenu(): void {
+    this.notifMenuOpen.update(v => !v);
+    if (this.notifMenuOpen()) this.refreshNotif();
+  }
+
+  marcarTodas(): void {
+    this.notifSvc.marcarTodas().subscribe({ next: () => this.refreshNotif() });
+  }
+
+  onNotifClick(n: NotificacionDto): void {
+    if (!n.leida) {
+      this.notifSvc.marcarLeida(n.id).subscribe({ next: () => this.refreshNotif() });
+    }
+    this.notifMenuOpen.set(false);
+    if (n.url) this.router.navigateByUrl(n.url);
+  }
 
   firstName(): string {
     return this.auth.currentUser()?.name?.split(' ')[0] ?? '';

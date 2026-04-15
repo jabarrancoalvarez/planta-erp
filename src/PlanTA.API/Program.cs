@@ -233,6 +233,21 @@ using (var scope = app.Services.CreateScope())
             "ALTER TABLE seguridad.\"Empresas\" ADD COLUMN IF NOT EXISTS \"OnboardingCompletado\" boolean NOT NULL DEFAULT false");
         await segDb.Database.ExecuteSqlRawAsync(
             "ALTER TABLE seguridad.\"AspNetUsers\" ADD COLUMN IF NOT EXISTS \"ModulosDeshabilitados\" text NULL");
+        await segDb.Database.ExecuteSqlRawAsync(@"
+            CREATE TABLE IF NOT EXISTS seguridad.""Notificaciones"" (
+                ""Id"" uuid PRIMARY KEY,
+                ""EmpresaId"" uuid NOT NULL,
+                ""UsuarioId"" uuid NULL,
+                ""Titulo"" varchar(200) NOT NULL,
+                ""Mensaje"" varchar(2000) NOT NULL,
+                ""Tipo"" varchar(20) NOT NULL,
+                ""Url"" varchar(500) NULL,
+                ""Leida"" boolean NOT NULL DEFAULT false,
+                ""CreatedAt"" timestamp with time zone NOT NULL,
+                ""LeidaAt"" timestamp with time zone NULL
+            )");
+        await segDb.Database.ExecuteSqlRawAsync(
+            "CREATE INDEX IF NOT EXISTS \"IX_Notificaciones_EmpresaId_UsuarioId_Leida\" ON seguridad.\"Notificaciones\" (\"EmpresaId\", \"UsuarioId\", \"Leida\")");
     }
     catch { }
 

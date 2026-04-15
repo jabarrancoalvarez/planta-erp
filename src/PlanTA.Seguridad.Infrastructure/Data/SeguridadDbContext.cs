@@ -11,6 +11,7 @@ public class SeguridadDbContext : IdentityDbContext<ApplicationUser, IdentityRol
     public SeguridadDbContext(DbContextOptions<SeguridadDbContext> options) : base(options) { }
 
     public DbSet<Empresa> Empresas => Set<Empresa>();
+    public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -31,6 +32,16 @@ public class SeguridadDbContext : IdentityDbContext<ApplicationUser, IdentityRol
         {
             e.Property(u => u.Nombre).HasMaxLength(200).IsRequired();
             e.HasIndex(u => u.EmpresaId);
+        });
+
+        builder.Entity<Notificacion>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Titulo).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Mensaje).HasMaxLength(2000).IsRequired();
+            e.Property(x => x.Tipo).HasMaxLength(20).IsRequired();
+            e.Property(x => x.Url).HasMaxLength(500);
+            e.HasIndex(x => new { x.EmpresaId, x.UsuarioId, x.Leida });
         });
     }
 }
