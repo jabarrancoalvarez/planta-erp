@@ -72,10 +72,22 @@ public sealed class EmpresaDemoSeeder(
         );
         total += 5;
 
-        await crm.SaveChangesAsync(ct);
-        await inv.SaveChangesAsync(ct);
-        await com.SaveChangesAsync(ct);
-        await rrhh.SaveChangesAsync(ct);
+        try
+        {
+            await crm.SaveChangesAsync(ct);
+            await inv.SaveChangesAsync(ct);
+            await com.SaveChangesAsync(ct);
+            await rrhh.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex)
+        {
+            var inner = ex.InnerException?.Message ?? "";
+            var entries = ex.Entries.Select(e =>
+                $"{e.Entity.GetType().Name}[{e.State}]={{{string.Join(",", e.Properties.Select(p => $"{p.Metadata.Name}={p.CurrentValue}"))}}}");
+            return Result<int>.Failure(Error.Validation(
+                "Demo.SaveFailed",
+                $"{ex.Message} | Inner: {inner} | Entries: {string.Join(" || ", entries)}"));
+        }
 
         return Result<int>.Success(total);
     }
