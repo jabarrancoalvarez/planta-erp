@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from './api.service';
 
-export type TipoFichaje = 'Entrada' | 'Salida' | 'InicioPausa' | 'FinPausa';
+export type TipoFichaje = 'EntradaJornada' | 'SalidaJornada' | 'InicioDescanso' | 'FinDescanso';
 
 interface QueuedFichaje {
   id: string;

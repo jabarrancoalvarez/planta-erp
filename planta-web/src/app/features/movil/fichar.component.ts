@@ -30,19 +30,19 @@ import { FichajesOfflineService, TipoFichaje } from '../../core/services/fichaje
       }
 
       <div class="fichar__buttons">
-        <button class="fichar__btn fichar__btn--entrada" [disabled]="loading()" (click)="registrar('Entrada')">
+        <button class="fichar__btn fichar__btn--entrada" [disabled]="loading()" (click)="registrar('EntradaJornada')">
           <span class="fichar__btn-icon">▶</span>
           <span>Entrada</span>
         </button>
-        <button class="fichar__btn fichar__btn--pausa" [disabled]="loading()" (click)="registrar('InicioPausa')">
+        <button class="fichar__btn fichar__btn--pausa" [disabled]="loading()" (click)="registrar('InicioDescanso')">
           <span class="fichar__btn-icon">❚❚</span>
           <span>Inicio pausa</span>
         </button>
-        <button class="fichar__btn fichar__btn--pausa" [disabled]="loading()" (click)="registrar('FinPausa')">
+        <button class="fichar__btn fichar__btn--pausa" [disabled]="loading()" (click)="registrar('FinDescanso')">
           <span class="fichar__btn-icon">▶</span>
           <span>Fin pausa</span>
         </button>
-        <button class="fichar__btn fichar__btn--salida" [disabled]="loading()" (click)="registrar('Salida')">
+        <button class="fichar__btn fichar__btn--salida" [disabled]="loading()" (click)="registrar('SalidaJornada')">
           <span class="fichar__btn-icon">■</span>
           <span>Salida</span>
         </button>
